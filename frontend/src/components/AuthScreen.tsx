@@ -33,7 +33,7 @@ export const AuthScreen = ({
         >
           {/* Background Elements */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#a3ff12]/10 blur-[120px] rounded-full" />
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#baf413]/10 blur-[120px] rounded-full" />
             <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full" />
           </div>
 
@@ -44,13 +44,13 @@ export const AuthScreen = ({
             className="relative z-10 w-full max-w-md text-center"
           >
             <div className="flex justify-center mb-8">
-              <div className="bg-[#a3ff12] p-6 rounded-[32px] shadow-2xl shadow-[#a3ff12]/20 rotate-12">
+              <div className="bg-[#baf413] p-6 rounded-[32px] shadow-2xl shadow-[#baf413]/20 rotate-12">
                 <SkaterLogo />
               </div>
             </div>
 
             <h1 className="text-5xl font-black text-white mb-4 tracking-tighter leading-none uppercase">
-              Urban<span className="text-[#a3ff12]">Flow</span>
+              Urban<span className="text-[#baf413]">Flow</span>
             </h1>
             <p className="text-slate-400 text-lg mb-12 font-medium">
               Explora, graba y comparte los mejores spots de la ciudad.

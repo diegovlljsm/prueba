@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { ChevronLeft, Share2, Star, Trash2, Video, Plus, Check, X } from 'lucide-react';
+import { ChevronLeft, Navigation, Share2, Star, Trash2, Video, Plus, Check, X } from 'lucide-react';
 import { Spot, VideoClip } from '../types';
 
 interface SpotDetailProps {
@@ -10,9 +10,13 @@ interface SpotDetailProps {
   onUpload: () => void;
   isAdmin: boolean;
   onDelete: (id: string) => void;
+  /** Traza la ruta hasta el spot. Opcional: sin ubicación del usuario no se ofrece. */
+  onComoLlegar?: (spot: Spot) => void;
+  /** Distancia ya formateada desde el usuario, si la sabemos. */
+  distancia?: string | null;
 }
 
-export const SpotDetail = ({ spot, videos, onClose, onUpload, isAdmin, onDelete }: SpotDetailProps) => {
+export const SpotDetail = ({ spot, videos, onClose, onUpload, isAdmin, onDelete, onComoLlegar, distancia }: SpotDetailProps) => {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -26,7 +30,7 @@ export const SpotDetail = ({ spot, videos, onClose, onUpload, isAdmin, onDelete 
         </button>
         <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-slate-400">Spot Detail</h2>
         <button className="p-2 bg-white/5 rounded-full active:scale-90 transition-transform">
-          <Share2 className="w-6 h-6 text-[#a3ff12]" />
+          <Share2 className="w-6 h-6 text-[#baf413]" />
         </button>
       </div>
 
@@ -47,10 +51,10 @@ export const SpotDetail = ({ spot, videos, onClose, onUpload, isAdmin, onDelete 
           referrerPolicy="no-referrer"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-        <div className="absolute bottom-6 left-6 bg-[#a3ff12] text-black text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg shadow-[#a3ff12]/20">
+        <div className="absolute bottom-6 left-6 bg-[#baf413] text-black text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg shadow-[#baf413]/20">
           ACTIVE NOW
         </div>
-        <button className="absolute bottom-6 right-6 p-4 bg-[#a3ff12] rounded-full text-black shadow-xl active:scale-90 transition-all hover:rotate-12">
+        <button className="absolute bottom-6 right-6 p-4 bg-[#baf413] rounded-full text-black shadow-xl active:scale-90 transition-all hover:rotate-12">
           <Star className="w-6 h-6 fill-black" />
         </button>
       </div>
@@ -69,8 +73,8 @@ export const SpotDetail = ({ spot, videos, onClose, onUpload, isAdmin, onDelete 
             </button>
           )}
         </div>
-        <div className="flex items-center gap-1.5 text-[#a3ff12]">
-          <div className="w-2 h-2 bg-[#a3ff12] rounded-full animate-pulse" />
+        <div className="flex items-center gap-1.5 text-[#baf413]">
+          <div className="w-2 h-2 bg-[#baf413] rounded-full animate-pulse" />
           <p className="text-xs font-black uppercase tracking-widest opacity-80">{spot.location_name || 'Ubicación desconocida'}</p>
         </div>
       </div>
@@ -98,15 +102,26 @@ export const SpotDetail = ({ spot, videos, onClose, onUpload, isAdmin, onDelete 
         </p>
       </div>
 
+      {/* Cómo llegar: la acción principal de la ficha en la maqueta. */}
+      {onComoLlegar && (
+        <button
+          onClick={() => onComoLlegar(spot)}
+          className="w-full flex items-center justify-center gap-2 bg-[#baf413] text-black font-black py-4 rounded-full shadow-lg shadow-[#baf413]/20 active:scale-95 transition-all"
+        >
+          <Navigation className="w-5 h-5" />
+          Cómo llegar{distancia ? ` · ${distancia}` : ''}
+        </button>
+      )}
+
       {/* Video Section */}
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h3 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
-            <Video className="w-5 h-5 text-[#a3ff12]" /> CLIPS <span className="text-slate-500 text-sm">({videos.length})</span>
+            <Video className="w-5 h-5 text-[#baf413]" /> CLIPS <span className="text-slate-500 text-sm">({videos.length})</span>
           </h3>
           <button 
             onClick={onUpload}
-            className="bg-[#a3ff12] text-black px-4 py-2 rounded-full text-xs font-black flex items-center gap-1.5 shadow-lg shadow-[#a3ff12]/20 active:scale-95 transition-all"
+            className="bg-[#baf413] text-black px-4 py-2 rounded-full text-xs font-black flex items-center gap-1.5 shadow-lg shadow-[#baf413]/20 active:scale-95 transition-all"
           >
             <Plus className="w-4 h-4" /> SUBIR CLIP
           </button>
@@ -129,7 +144,7 @@ export const SpotDetail = ({ spot, videos, onClose, onUpload, isAdmin, onDelete 
                 />
                 <div className="p-4 flex items-center justify-between bg-slate-900/80 backdrop-blur-md">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-[#a3ff12] rounded-full flex items-center justify-center text-black font-black text-[10px]">
+                    <div className="w-8 h-8 bg-[#baf413] rounded-full flex items-center justify-center text-black font-black text-[10px]">
                       {video.user_name.substring(0, 2).toUpperCase()}
                     </div>
                     <div>

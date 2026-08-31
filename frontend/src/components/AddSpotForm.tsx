@@ -27,7 +27,7 @@ export const AddSpotForm: React.FC<AddSpotFormProps> = ({
   const [addressSearch, setAddressSearch] = useState('');
   const [isSearchingAddress, setIsSearchingAddress] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [markerColor, setMarkerColor] = useState('#a3ff12');
+  const [markerColor, setMarkerColor] = useState('#baf413');
   const [showLabelOnMap, setShowLabelOnMap] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
@@ -104,7 +104,7 @@ export const AddSpotForm: React.FC<AddSpotFormProps> = ({
       <div className="flex items-center justify-between">
         <button onClick={onClose}><X className="w-6 h-6" /></button>
         <h2 className="text-xl font-bold">Add New Spot</h2>
-        <button className="p-1 bg-[#a3ff12] rounded-full">
+        <button className="p-1 bg-[#baf413] rounded-full">
           <Info className="w-5 h-5 text-black" />
         </button>
       </div>
@@ -166,13 +166,13 @@ export const AddSpotForm: React.FC<AddSpotFormProps> = ({
           <div className="space-y-2">
             <div 
               onClick={() => document.getElementById('spot-photo-upload')?.click()}
-              className="relative rounded-[40px] overflow-hidden aspect-[4/3] bg-[#1a1f14] border border-dashed border-[#a3ff12]/20 cursor-pointer group shadow-2xl"
+              className="relative rounded-[40px] overflow-hidden aspect-[4/3] bg-[#1a1f14] border border-dashed border-[#baf413]/20 cursor-pointer group shadow-2xl"
             >
               {selectedImage ? (
                 <img src={selectedImage} className="w-full h-full object-cover" alt="Preview" />
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/40">
-                  <div className="w-20 h-20 bg-[#a3ff12] rounded-full flex items-center justify-center shadow-xl shadow-[#a3ff12]/20 group-hover:scale-110 transition-transform">
+                  <div className="w-20 h-20 bg-[#baf413] rounded-full flex items-center justify-center shadow-xl shadow-[#baf413]/20 group-hover:scale-110 transition-transform">
                     <Camera className="w-10 h-10 text-black" />
                   </div>
                   <p className="text-sm font-black text-white uppercase tracking-widest">TAP TO UPLOAD PHOTO</p>
@@ -193,7 +193,7 @@ export const AddSpotForm: React.FC<AddSpotFormProps> = ({
             <input 
               name="name" 
               required 
-              className="w-full bg-[#1a1f14] border-2 border-[#a3ff12]/20 rounded-[24px] p-4 text-lg font-bold text-white focus:outline-none focus:border-[#a3ff12] transition-colors" 
+              className="w-full bg-[#1a1f14] border-2 border-[#baf413]/20 rounded-[24px] p-4 text-lg font-bold text-white focus:outline-none focus:border-[#baf413] transition-colors" 
               placeholder="e.g. Concrete Waves Ledge" 
             />
           </div>
@@ -256,7 +256,7 @@ export const AddSpotForm: React.FC<AddSpotFormProps> = ({
             <div className="space-y-1">
               <label className="text-[10px] uppercase font-mono text-slate-500">Color del Marcador</label>
               <div className="flex gap-2">
-                {['#a3ff12', '#6366f1', '#f43f5e', '#f59e0b', '#ffffff'].map(color => (
+                {['#baf413', '#6366f1', '#f43f5e', '#f59e0b', '#ffffff'].map(color => (
                   <button
                     key={color}
                     type="button"

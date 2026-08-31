@@ -50,17 +50,17 @@ export const STORIES: Story[] = [
 ];
 
 export const MAP_STYLES = [
-  { "featureType": "all", "elementType": "geometry", "stylers": [{ "color": "#0f172a" }] },
+  { "featureType": "all", "elementType": "geometry", "stylers": [{ "color": "#070f18" }] },
   { "featureType": "all", "elementType": "labels.text.stroke", "stylers": [{ "visibility": "off" }] },
-  { "featureType": "all", "elementType": "labels.text.fill", "stylers": [{ "color": "#94a3b8" }] },
-  { "featureType": "road", "elementType": "geometry", "stylers": [{ "color": "#1e293b" }] },
-  { "featureType": "road", "elementType": "labels.text.fill", "stylers": [{ "visibility": "on" }, { "color": "#cbd5e1" }] },
-  { "featureType": "road.highway", "elementType": "geometry", "stylers": [{ "color": "#334155" }] },
-  { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#020617" }] },
+  { "featureType": "all", "elementType": "labels.text.fill", "stylers": [{ "color": "#6b7885" }] },
+  { "featureType": "road", "elementType": "geometry", "stylers": [{ "color": "#131b24" }] },
+  { "featureType": "road", "elementType": "labels.text.fill", "stylers": [{ "visibility": "on" }, { "color": "#8a97a6" }] },
+  { "featureType": "road.highway", "elementType": "geometry", "stylers": [{ "color": "#1c232b" }] },
+  { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#030a11" }] },
   { "featureType": "administrative.locality", "elementType": "labels.text.fill", "stylers": [{ "visibility": "on" }, { "color": "#ffffff" }, { "weight": 2 }] },
   { "featureType": "administrative.locality", "elementType": "labels.text", "stylers": [{ "scale": 1.2 }] },
   { "featureType": "poi", "elementType": "all", "stylers": [{ "visibility": "off" }] },
-  { "featureType": "poi.park", "elementType": "geometry", "stylers": [{ "visibility": "on" }, { "color": "#064e3b" }] },
-  { "featureType": "poi.park", "elementType": "labels.text.fill", "stylers": [{ "visibility": "on" }, { "color": "#4ade80" }] },
+  { "featureType": "poi.park", "elementType": "geometry", "stylers": [{ "visibility": "on" }, { "color": "#1b2504" }] },
+  { "featureType": "poi.park", "elementType": "labels.text.fill", "stylers": [{ "visibility": "on" }, { "color": "#74a007" }] },
   { "featureType": "transit", "elementType": "all", "stylers": [{ "visibility": "off" }] },
 ];

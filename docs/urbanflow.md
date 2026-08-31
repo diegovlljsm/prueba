@@ -215,3 +215,21 @@ Entradas nuevas al final. Formato:
   `console.error`, se muestra al usuario con un mensaje accionable; hay reserva
   por redirección cuando el navegador bloquea la ventana emergente (Brave y
   Safari lo hacen por defecto), y se recoge el `getRedirectResult` al volver.
+- **2026-08-30** — Diego entregó las maquetas del aplicativo en `docs/img` y
+  `frontend/docs_frontend/img`: 22 pantallas. La paleta se extrajo muestreando
+  los píxeles con un histograma de color, no a ojo: fondo `#070F18`,
+  superficie `#131B24`, acento `#BAF413`. Aplicada redefiniendo las escalas
+  `slate` y `emerald` del `@theme` de Tailwind, de modo que toda la app hereda
+  la paleta sin reescribir pantalla por pantalla.
+- **2026-08-30** — [FEAT-005] Implementadas las features de geolocalización de
+  la maqueta: globo sobre el mapa con la descripción de cada spot
+  (`PopupSpot`), panel de "Cómo llegar" con los cuatro modos de viaje, resumen
+  y tramos paso a paso (`RutaAlSpot` + hook `useRuta` sobre la Directions API),
+  y distancia real al usuario en las listas (`lib/geo.ts`, haversine).
+- **2026-08-30** — La distancia solo se muestra cuando el GPS respondió de
+  verdad: `userLocation` arranca en el centro de Santiago como encuadre por
+  defecto del mapa, y enseñar distancias desde ahí sería inventar datos.
+- **2026-08-30** — Pendiente para poder ver el mapa: además de la Maps
+  JavaScript API, hay que habilitar la **Directions API** en la misma clave de
+  Google. Son dos servicios distintos; sin el segundo, "Cómo llegar" responde
+  REQUEST_DENIED y el panel lo dice explícitamente.

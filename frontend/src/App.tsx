@@ -54,7 +54,11 @@ import { SpotDetail } from './components/SpotDetail';
 import { EventDetail } from './components/EventDetail';
 import { AuthScreen } from './components/AuthScreen';
 import { AddSpotForm } from './components/AddSpotForm';
+import { PopupSpot } from './components/PopupSpot';
+import { RutaAlSpot } from './components/RutaAlSpot';
 import { useAuth } from './hooks/useAuth';
+import { useRuta } from './hooks/useRuta';
+import { distanciaAlUsuario } from './lib/geo';
 import { api } from './services/api';
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
@@ -104,12 +108,60 @@ export default function App() {
   const [isOverlayMinimized, setIsOverlayMinimized] = useState(false);
   const [spotToDelete, setSpotToDelete] = useState<string | null>(null);
 
+  // Spot cuyo globo está abierto sobre el mapa. Separado de `selectedSpot`
+  // a propósito: pulsar un marcador debe dar un vistazo rápido, no abrir la
+  // ficha completa y tapar el mapa.
+  const [spotEnPopup, setSpotEnPopup] = useState<Spot | null>(null);
+  const [spotEnRuta, setSpotEnRuta] = useState<Spot | null>(null);
+
+  // `userLocation` arranca en el centro de Santiago como posición por defecto
+  // del mapa. Esta bandera distingue esa suposición de una lectura real del
+  // GPS, para no enseñar distancias inventadas desde un punto donde nadie está.
+  const [ubicacionEsReal, setUbicacionEsReal] = useState(false);
+
+  const ruta = useRuta();
+
+  const ubicacionUsuario = ubicacionEsReal ? userLocation : null;
+
+  /** Abre el panel de ruta y calcula el trayecto desde donde está el usuario. */
+  const handleComoLlegar = useCallback(
+    (spot: Spot) => {
+      if (!ubicacionUsuario) {
+        alert('Necesitamos tu ubicación para trazar la ruta. Pulsa el botón de localizarte y concede el permiso.');
+        return;
+      }
+      setSpotEnPopup(null);
+      setSpotEnRuta(spot);
+      ruta.calcular(ubicacionUsuario, { lat: spot.lat, lng: spot.lng });
+    },
+    [ubicacionUsuario, ruta]
+  );
+
+  const handleCerrarRuta = useCallback(() => {
+    setSpotEnRuta(null);
+    ruta.limpiar();
+  }, [ruta]);
+
+  /** Cambiar de modo recalcula sobre el mismo destino. */
+  const handleCambiarModoRuta = useCallback(
+    (modo: Parameters<typeof ruta.setModo>[0]) => {
+      if (spotEnRuta && ubicacionUsuario) {
+        ruta.calcular(ubicacionUsuario, { lat: spotEnRuta.lat, lng: spotEnRuta.lng }, modo);
+      } else {
+        ruta.setModo(modo);
+      }
+    },
+    [spotEnRuta, ubicacionUsuario, ruta]
+  );
+
+
   useEffect(() => {
     fetchSpots();
     fetchEvents();
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((pos) => {
         setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setUbicacionEsReal(true);
       });
     }
   }, []);
@@ -174,6 +226,17 @@ export default function App() {
     }
   }, [api]);
 
+  /** Del globo del mapa a la ficha completa del spot. */
+  const handleVerDetalleDesdePopup = useCallback(
+    (spot: Spot) => {
+      setSpotEnPopup(null);
+      setSelectedSpot(spot);
+      fetchSpotVideos(spot.id);
+      if (window.innerWidth < 768) setShowMobileOverlay(true);
+    },
+    [fetchSpotVideos]
+  );
+
   const handleDeleteSpot = (spotId: string) => {
     setSpotToDelete(spotId);
   };
@@ -218,6 +281,8 @@ export default function App() {
             lng: position.coords.longitude,
           };
           setCurrentUserLocation(pos);
+          setUserLocation(pos);
+          setUbicacionEsReal(true);
           if (map) {
             map.panTo(pos);
             map.setZoom(16);
@@ -381,14 +446,14 @@ export default function App() {
             className="flex h-screen w-full overflow-hidden font-sans bg-slate-950 text-slate-50 flex-col md:flex-row"
           >
             {/* Desktop Vertical Nav */}
-            <div className="hidden md:flex w-20 bg-[#0a0f02] border-r border-white/5 flex-col items-center py-8 gap-6 z-30">
+            <div className="hidden md:flex w-20 bg-[#070f18] border-r border-white/5 flex-col items-center py-8 gap-6 z-30">
               <div className="p-3 bg-emerald-500 rounded-2xl mb-6">
                 <Activity className="w-6 h-6 text-slate-950" />
               </div>
               
               <button 
                 onClick={() => { setActiveTab('map'); setSelectedSpot(null); setSelectedEvent(null); setIsAddingSpot(false); setShowAdminPanel(false); }}
-                className={cn("p-3 rounded-2xl transition-all group relative", activeTab === 'map' && !selectedSpot && !selectedEvent && !isAddingSpot && !showAdminPanel ? "bg-[#a3ff12] text-black shadow-lg shadow-[#a3ff12]/20" : "text-slate-500 hover:text-white hover:bg-white/5")}
+                className={cn("p-3 rounded-2xl transition-all group relative", activeTab === 'map' && !selectedSpot && !selectedEvent && !isAddingSpot && !showAdminPanel ? "bg-[#baf413] text-black shadow-lg shadow-[#baf413]/20" : "text-slate-500 hover:text-white hover:bg-white/5")}
                 title="Inicio"
               >
                 <Home className="w-6 h-6" />
@@ -397,7 +462,7 @@ export default function App() {
 
               <button 
                 onClick={() => { setActiveTab('list'); setSelectedSpot(null); setSelectedEvent(null); setIsAddingSpot(false); setShowAdminPanel(false); }}
-                className={cn("p-3 rounded-2xl transition-all group relative", activeTab === 'list' && !selectedSpot ? "bg-[#a3ff12] text-black shadow-lg shadow-[#a3ff12]/20" : "text-slate-500 hover:text-white hover:bg-white/5")}
+                className={cn("p-3 rounded-2xl transition-all group relative", activeTab === 'list' && !selectedSpot ? "bg-[#baf413] text-black shadow-lg shadow-[#baf413]/20" : "text-slate-500 hover:text-white hover:bg-white/5")}
                 title="Spots"
               >
                 <Compass className="w-6 h-6" />
@@ -406,7 +471,7 @@ export default function App() {
 
               <button 
                 onClick={() => { setIsAddingSpot(true); setSelectedSpot(null); setSelectedEvent(null); setShowAdminPanel(false); }}
-                className={cn("p-3 rounded-2xl transition-all group relative", isAddingSpot ? "bg-[#a3ff12] text-black shadow-lg shadow-[#a3ff12]/20" : "text-slate-500 hover:text-white hover:bg-white/5")}
+                className={cn("p-3 rounded-2xl transition-all group relative", isAddingSpot ? "bg-[#baf413] text-black shadow-lg shadow-[#baf413]/20" : "text-slate-500 hover:text-white hover:bg-white/5")}
                 title="Añadir Spot"
               >
                 <Plus className="w-6 h-6" />
@@ -415,7 +480,7 @@ export default function App() {
 
               <button 
                 onClick={() => { setActiveTab('events'); setSelectedSpot(null); setSelectedEvent(null); setIsAddingSpot(false); setShowAdminPanel(false); }}
-                className={cn("p-3 rounded-2xl transition-all group relative", activeTab === 'events' && !selectedEvent ? "bg-[#a3ff12] text-black shadow-lg shadow-[#a3ff12]/20" : "text-slate-500 hover:text-white hover:bg-white/5")}
+                className={cn("p-3 rounded-2xl transition-all group relative", activeTab === 'events' && !selectedEvent ? "bg-[#baf413] text-black shadow-lg shadow-[#baf413]/20" : "text-slate-500 hover:text-white hover:bg-white/5")}
                 title="Eventos"
               >
                 <MapPin className="w-6 h-6" />
@@ -424,7 +489,7 @@ export default function App() {
 
               <button 
                 onClick={() => { setActiveTab('community'); setSelectedSpot(null); setSelectedEvent(null); setIsAddingSpot(false); setShowAdminPanel(false); }}
-                className={cn("p-3 rounded-2xl transition-all group relative", activeTab === 'community' ? "bg-[#a3ff12] text-black shadow-lg shadow-[#a3ff12]/20" : "text-slate-500 hover:text-white hover:bg-white/5")}
+                className={cn("p-3 rounded-2xl transition-all group relative", activeTab === 'community' ? "bg-[#baf413] text-black shadow-lg shadow-[#baf413]/20" : "text-slate-500 hover:text-white hover:bg-white/5")}
                 title="Comunidad"
               >
                 <Users className="w-6 h-6" />
@@ -435,7 +500,7 @@ export default function App() {
                 {isAdmin && (
                   <button 
                     onClick={() => { setShowAdminPanel(true); setSelectedSpot(null); setSelectedEvent(null); setIsAddingSpot(false); }}
-                    className={cn("p-3 rounded-2xl transition-all group relative", showAdminPanel ? "bg-[#a3ff12] text-black shadow-lg shadow-[#a3ff12]/20" : "text-slate-500 hover:text-white hover:bg-white/5")}
+                    className={cn("p-3 rounded-2xl transition-all group relative", showAdminPanel ? "bg-[#baf413] text-black shadow-lg shadow-[#baf413]/20" : "text-slate-500 hover:text-white hover:bg-white/5")}
                     title="Admin"
                   >
                     <ShieldCheck className="w-6 h-6" />
@@ -495,7 +560,7 @@ export default function App() {
                       <div className="flex items-start justify-between">
                         <div>
                           <h3 className="font-medium text-slate-200 group-hover:text-emerald-400 transition-colors">{spot.name}</h3>
-                          <p className="text-xs text-slate-500 line-clamp-1">{spot.description}</p>
+                          <p className="text-xs text-slate-500 line-clamp-1">{[distanciaAlUsuario({ lat: spot.lat, lng: spot.lng }, ubicacionUsuario), spot.description].filter(Boolean).join(" · ")}</p>
                         </div>
                         <span className="text-[10px] bg-slate-800 px-2 py-1 rounded-full text-slate-400 uppercase font-mono">
                           {parseCategories(spot.category)}
@@ -577,7 +642,7 @@ export default function App() {
                     <div className="flex items-start justify-between">
                       <div>
                         <h3 className="font-medium text-slate-200 group-hover:text-emerald-400 transition-colors">{spot.name}</h3>
-                        <p className="text-xs text-slate-500 line-clamp-1">{spot.description}</p>
+                        <p className="text-xs text-slate-500 line-clamp-1">{[distanciaAlUsuario({ lat: spot.lat, lng: spot.lng }, ubicacionUsuario), spot.description].filter(Boolean).join(" · ")}</p>
                       </div>
                       <span className="text-[10px] bg-slate-800 px-2 py-1 rounded-full text-slate-400 uppercase font-mono">
                         {parseCategories(spot.category)}
@@ -645,6 +710,8 @@ export default function App() {
                 onUpload={() => setIsUploading(true)}
                 isAdmin={isAdmin}
                 onDelete={handleDeleteSpot}
+                onComoLlegar={ubicacionUsuario ? handleComoLlegar : undefined}
+                distancia={distanciaAlUsuario({ lat: selectedSpot.lat, lng: selectedSpot.lng }, ubicacionUsuario)}
               />
             )}
 
@@ -716,11 +783,11 @@ export default function App() {
         {/* Main Content Area */}
         <div className="flex-1 relative z-10 flex flex-col">
           {/* Mobile Header */}
-          <div className="md:hidden flex items-center justify-between p-4 bg-[#0a0f02] border-b border-white/5 z-50">
+          <div className="md:hidden flex items-center justify-between p-4 bg-[#070f18] border-b border-white/5 z-50">
             <div className="flex items-center gap-2 select-none">
               <SkaterLogo />
               <h1 className="text-xl font-black tracking-tighter text-white">URBANFLOW</h1>
-              {isAdmin && <ShieldCheck className="w-4 h-4 text-[#a3ff12]" />}
+              {isAdmin && <ShieldCheck className="w-4 h-4 text-[#baf413]" />}
             </div>
             <div className="flex items-center gap-3">
               <button 
@@ -762,14 +829,15 @@ export default function App() {
                     key={spot.id}
                     position={{ lat: spot.lat, lng: spot.lng }}
                     title={spot.name}
-                    icon={getMarkerIcon(spot.marker_color || '#a3ff12')}
+                    icon={getMarkerIcon(spot.marker_color || '#baf413')}
                     onClick={() => {
-                      setSelectedSpot(spot);
-                      fetchSpotVideos(spot.id);
-                      if (window.innerWidth < 768) setShowMobileOverlay(true);
+                      // Un toque abre el globo con el resumen; la ficha
+                      // completa queda a un toque más, desde el propio globo.
+                      setHoveredSpot(null);
+                      setSpotEnPopup(spot);
                     }}
                     onMouseOver={(e) => {
-                      if (window.innerWidth >= 768) {
+                      if (window.innerWidth >= 768 && !spotEnPopup) {
                         setHoveredSpot(spot);
                         setMousePos({ x: e.domEvent.clientX, y: e.domEvent.clientY });
                       }
@@ -777,6 +845,22 @@ export default function App() {
                     onMouseOut={() => setHoveredSpot(null)}
                   />
                 ))}
+
+                {spotEnPopup && (
+                  <InfoWindow
+                    position={{ lat: spotEnPopup.lat, lng: spotEnPopup.lng }}
+                    pixelOffset={[0, -38]}
+                    onCloseClick={() => setSpotEnPopup(null)}
+                    headerDisabled
+                  >
+                    <PopupSpot
+                      spot={spotEnPopup}
+                      ubicacionUsuario={ubicacionUsuario}
+                      onComoLlegar={handleComoLlegar}
+                      onVerDetalle={handleVerDetalleDesdePopup}
+                    />
+                  </InfoWindow>
+                )}
 
             {/* Hover Preview - Desktop Only */}
             <AnimatePresence>
@@ -800,14 +884,14 @@ export default function App() {
                         className="w-full h-full object-cover"
                         referrerPolicy="no-referrer"
                       />
-                      <div className="absolute top-3 right-3 bg-[#a3ff12] text-black text-[9px] font-black px-2.5 py-1 rounded-full shadow-lg">
+                      <div className="absolute top-3 right-3 bg-[#baf413] text-black text-[9px] font-black px-2.5 py-1 rounded-full shadow-lg">
                         {parseCategories(hoveredSpot.category)}
                       </div>
                     </div>
                     <div className="px-2 pb-1">
                       <h3 className="text-sm font-black text-white truncate">{hoveredSpot.name}</h3>
                       <div className="flex items-center gap-1.5 mt-1">
-                        <MapPin className="w-3.5 h-3.5 text-[#a3ff12]" />
+                        <MapPin className="w-3.5 h-3.5 text-[#baf413]" />
                         <span className="text-[11px] text-slate-400 font-bold truncate">
                           {hoveredSpot.location_name || "Spot Urbano"}
                         </span>
@@ -863,7 +947,7 @@ export default function App() {
                 className="bg-slate-900/80 backdrop-blur-md border border-slate-800 p-3 rounded-2xl shadow-2xl text-white hover:bg-slate-800 transition-colors flex items-center justify-center"
                 title="Mi ubicación"
               >
-                <Locate className="w-6 h-6 text-[#a3ff12]" />
+                <Locate className="w-6 h-6 text-[#baf413]" />
               </button>
               <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800 p-3 rounded-2xl shadow-2xl">
                 {user ? (
@@ -892,7 +976,7 @@ export default function App() {
                       <p className="text-sm font-bold">Invitado</p>
                       <button 
                         onClick={() => setIsGuest(false)}
-                        className="text-[10px] text-[#a3ff12] font-black uppercase tracking-widest"
+                        className="text-[10px] text-[#baf413] font-black uppercase tracking-widest"
                       >
                         Iniciar Sesión
                       </button>
@@ -980,6 +1064,8 @@ export default function App() {
                           onUpload={() => setIsUploading(true)}
                           isAdmin={isAdmin}
                           onDelete={handleDeleteSpot}
+                          onComoLlegar={ubicacionUsuario ? handleComoLlegar : undefined}
+                          distancia={distanciaAlUsuario({ lat: selectedSpot.lat, lng: selectedSpot.lng }, ubicacionUsuario)}
                         />
                       ) : selectedEvent ? (
                         <EventDetail 
@@ -1067,9 +1153,9 @@ export default function App() {
                         ))}
                       </div>
                     ) : activeTab === 'community' ? (
-                      <div className="bg-[#0a0f02] min-h-screen -mx-6 -mt-6 pb-20 overflow-y-auto no-scrollbar">
+                      <div className="bg-[#070f18] min-h-screen -mx-6 -mt-6 pb-20 overflow-y-auto no-scrollbar">
                         {/* Header */}
-                        <div className="flex items-center justify-between px-6 py-6 sticky top-0 bg-[#0a0f02]/90 backdrop-blur-xl z-50 border-b border-white/5">
+                        <div className="flex items-center justify-between px-6 py-6 sticky top-0 bg-[#070f18]/90 backdrop-blur-xl z-50 border-b border-white/5">
                           <div className="flex items-center gap-3">
                             <SkaterLogo />
                             <h1 className="text-2xl font-black tracking-tighter text-white">URBANFLOW</h1>
@@ -1107,7 +1193,7 @@ export default function App() {
                               <div className="relative active:scale-90 transition-all">
                                 <img src={story.avatar} className="w-16 h-16 rounded-full bg-slate-800 border border-white/10" alt={story.name} />
                                 {story.isUser && (
-                                  <div className="absolute bottom-0 right-0 bg-[#a3ff12] rounded-full p-1 border-2 border-[#0a0f02]">
+                                  <div className="absolute bottom-0 right-0 bg-[#baf413] rounded-full p-1 border-2 border-[#070f18]">
                                     <Plus className="w-3 h-3 text-black" />
                                   </div>
                                 )}
@@ -1128,7 +1214,7 @@ export default function App() {
                                   <div>
                                     <h3 className="text-sm font-black text-white tracking-tight">{post.user.name}</h3>
                                     <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-                                      <MapPin className="w-3 h-3 text-[#a3ff12]" />
+                                      <MapPin className="w-3 h-3 text-[#baf413]" />
                                       {post.user.location}
                                     </div>
                                   </div>
@@ -1142,9 +1228,9 @@ export default function App() {
                               <div className="relative aspect-[4/5] mx-4 rounded-[40px] overflow-hidden shadow-2xl shadow-black/50 group">
                                 <img src={post.image} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Skate trick" />
                                 {post.isValidated && (
-                                  <div className="absolute bottom-8 right-8 bg-black/60 backdrop-blur-xl px-4 py-2 rounded-full border border-[#a3ff12]/30 flex items-center gap-2">
-                                    <ShieldCheck className="w-4 h-4 text-[#a3ff12]" />
-                                    <span className="text-[10px] font-black text-[#a3ff12] tracking-[0.2em] uppercase">Spot Validated</span>
+                                  <div className="absolute bottom-8 right-8 bg-black/60 backdrop-blur-xl px-4 py-2 rounded-full border border-[#baf413]/30 flex items-center gap-2">
+                                    <ShieldCheck className="w-4 h-4 text-[#baf413]" />
+                                    <span className="text-[10px] font-black text-[#baf413] tracking-[0.2em] uppercase">Spot Validated</span>
                                   </div>
                                 )}
                               </div>
@@ -1153,7 +1239,7 @@ export default function App() {
                               <div className="flex items-center justify-between px-8">
                                 <div className="flex items-center gap-8">
                                   <button className="flex items-center gap-2.5 group active:scale-90 transition-all">
-                                    <Heart className="w-8 h-8 text-[#a3ff12] fill-[#a3ff12]" />
+                                    <Heart className="w-8 h-8 text-[#baf413] fill-[#baf413]" />
                                     <span className="text-sm font-black text-white">{post.likes}</span>
                                   </button>
                                   <button className="flex items-center gap-2.5 group active:scale-90 transition-all">
@@ -1177,7 +1263,7 @@ export default function App() {
                                 </p>
                                 <div className="flex flex-wrap gap-2.5">
                                   {post.tags.map(tag => (
-                                    <span key={tag} className="text-sm text-[#a3ff12] font-bold tracking-tight">{tag}</span>
+                                    <span key={tag} className="text-sm text-[#baf413] font-bold tracking-tight">{tag}</span>
                                   ))}
                                 </div>
                                 <button className="text-xs text-slate-500 font-bold uppercase tracking-widest pt-2 hover:text-slate-400 transition-colors">
@@ -1197,13 +1283,13 @@ export default function App() {
           </div>
 
           {/* Mobile Bottom Nav */}
-          <div className="md:hidden bg-[#0a0f02] border-t border-white/5 px-6 py-3 pb-8 flex items-center justify-between z-[3000]">
+          <div className="md:hidden bg-[#070f18] border-t border-white/5 px-6 py-3 pb-8 flex items-center justify-between z-[3000]">
             <button 
               onClick={() => { 
                 if (activeTab === 'map' && !showMobileOverlay) return;
                 setActiveTab('map'); setShowMobileOverlay(false); setSelectedSpot(null); setSelectedEvent(null); setIsAddingSpot(false); setIsOverlayMinimized(false);
               }}
-              className={cn("flex flex-col items-center gap-1 transition-colors", activeTab === 'map' && !showMobileOverlay ? "text-[#a3ff12]" : "text-slate-500")}
+              className={cn("flex flex-col items-center gap-1 transition-colors", activeTab === 'map' && !showMobileOverlay ? "text-[#baf413]" : "text-slate-500")}
             >
               <Home className="w-6 h-6" />
               <span className="text-[10px] font-bold uppercase tracking-widest">Inicio</span>
@@ -1216,7 +1302,7 @@ export default function App() {
                   setActiveTab('list'); setShowMobileOverlay(true); setSelectedSpot(null); setSelectedEvent(null); setIsAddingSpot(false);
                 }
               }}
-              className={cn("flex flex-col items-center gap-1 transition-colors", activeTab === 'list' && showMobileOverlay ? "text-[#a3ff12]" : "text-slate-500")}
+              className={cn("flex flex-col items-center gap-1 transition-colors", activeTab === 'list' && showMobileOverlay ? "text-[#baf413]" : "text-slate-500")}
             >
               <Compass className="w-6 h-6" />
               <span className="text-[10px] font-bold uppercase tracking-widest">Spots</span>
@@ -1229,8 +1315,8 @@ export default function App() {
                   setIsAddingSpot(true); setShowMobileOverlay(true); setActiveTab('add'); setSelectedSpot(null); setSelectedEvent(null);
                 }
               }}
-              className={cn("w-14 h-14 rounded-full flex items-center justify-center shadow-2xl -mt-10 border-4 border-[#0a0f02] active:scale-95 transition-all", 
-                isAddingSpot && showMobileOverlay ? "bg-slate-800 text-[#a3ff12]" : "bg-[#a3ff12] text-black shadow-[#a3ff12]/20")}
+              className={cn("w-14 h-14 rounded-full flex items-center justify-center shadow-2xl -mt-10 border-4 border-[#070f18] active:scale-95 transition-all", 
+                isAddingSpot && showMobileOverlay ? "bg-slate-800 text-[#baf413]" : "bg-[#baf413] text-black shadow-[#baf413]/20")}
             >
               <Plus className={cn("w-8 h-8 transition-transform", isAddingSpot && showMobileOverlay ? "rotate-45" : "rotate-0")} />
             </button>
@@ -1242,7 +1328,7 @@ export default function App() {
                   setActiveTab('community'); setShowMobileOverlay(true); setSelectedSpot(null); setSelectedEvent(null); setIsAddingSpot(false);
                 }
               }}
-              className={cn("flex flex-col items-center gap-1 transition-colors", activeTab === 'community' && showMobileOverlay ? "text-[#a3ff12]" : "text-slate-500")}
+              className={cn("flex flex-col items-center gap-1 transition-colors", activeTab === 'community' && showMobileOverlay ? "text-[#baf413]" : "text-slate-500")}
             >
               <Users className="w-6 h-6" />
               <span className="text-[10px] font-bold uppercase tracking-widest">Comunidad</span>
@@ -1278,7 +1364,7 @@ export default function App() {
                     setActiveTab('admin'); setShowMobileOverlay(true); setSelectedSpot(null); setSelectedEvent(null); setIsAddingSpot(false);
                   }
                 }}
-                className={cn("flex flex-col items-center gap-1 transition-colors", activeTab === 'admin' && showMobileOverlay ? "text-[#a3ff12]" : "text-slate-500")}
+                className={cn("flex flex-col items-center gap-1 transition-colors", activeTab === 'admin' && showMobileOverlay ? "text-[#baf413]" : "text-slate-500")}
               >
                 <ShieldCheck className="w-6 h-6" />
                 <span className="text-[10px] font-bold uppercase tracking-widest">Admin</span>
@@ -1464,6 +1550,34 @@ export default function App() {
         </AnimatePresence>
       </motion.div>
     )}
+    </AnimatePresence>
+
+    {/* Panel de ruta: lateral en escritorio, hoja inferior en móvil.
+        Va por encima del mapa pero deja la línea trazada a la vista. */}
+    <AnimatePresence>
+      {spotEnRuta && (
+        <motion.div
+          initial={{ opacity: 0, x: 40 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 40 }}
+          transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+          className="fixed z-[4000] border border-slate-800 overflow-hidden
+                     inset-x-0 bottom-0 top-auto h-[72vh] rounded-t-[28px]
+                     md:inset-y-4 md:left-auto md:right-4 md:top-4 md:bottom-4 md:h-auto md:w-[380px] md:rounded-[28px]
+                     shadow-[0_20px_60px_rgba(0,0,0,0.6)]"
+        >
+          <RutaAlSpot
+            spot={spotEnRuta}
+            origen={ubicacionUsuario}
+            modo={ruta.modo}
+            resumen={ruta.resumen}
+            calculando={ruta.calculando}
+            error={ruta.error}
+            onCambiarModo={handleCambiarModoRuta}
+            onCerrar={handleCerrarRuta}
+          />
+        </motion.div>
+      )}
     </AnimatePresence>
 
     {/* Auth Selection Screen */}

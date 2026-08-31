@@ -17,14 +17,14 @@ export const NotFound = ({ ruta }: NotFoundProps) => {
   const rutaMostrada = ruta ?? `${window.location.pathname}${window.location.search}`;
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center bg-[#0f172a] text-slate-50 px-6 overflow-hidden">
+    <div className="relative min-h-screen w-full flex items-center justify-center bg-slate-950 text-slate-50 px-6 overflow-hidden">
       {/* Rejilla de mapa desvanecida hacia los bordes. */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
         style={{
           backgroundImage:
-            'repeating-linear-gradient(0deg, rgba(163,255,18,.07) 0 1px, transparent 1px 48px), repeating-linear-gradient(90deg, rgba(163,255,18,.07) 0 1px, transparent 1px 48px)',
+            'repeating-linear-gradient(0deg, rgba(186,244,19,.07) 0 1px, transparent 1px 48px), repeating-linear-gradient(90deg, rgba(186,244,19,.07) 0 1px, transparent 1px 48px)',
           maskImage: 'radial-gradient(75% 60% at 50% 45%, #000 0%, transparent 75%)',
           WebkitMaskImage: 'radial-gradient(75% 60% at 50% 45%, #000 0%, transparent 75%)',
         }}
@@ -34,13 +34,13 @@ export const NotFound = ({ ruta }: NotFoundProps) => {
         <div className="inline-flex items-center gap-2.5 mb-10">
           <SkaterLogo />
           <span className="font-extrabold text-[17px] tracking-tight">
-            URBAN<span className="text-[#a3ff12]">FLOW</span>
+            URBAN<span className="text-[#baf413]">FLOW</span>
           </span>
         </div>
 
         <p
-          className="font-mono font-bold text-[#a3ff12] m-0 leading-[0.85] tracking-[-0.05em] text-[clamp(84px,22vw,168px)]"
-          style={{ textShadow: '0 0 60px rgba(163,255,18,.28)' }}
+          className="font-mono font-bold text-[#baf413] m-0 leading-[0.85] tracking-[-0.05em] text-[clamp(84px,22vw,168px)]"
+          style={{ textShadow: '0 0 60px rgba(186,244,19,.28)' }}
         >
           404
         </p>
@@ -61,7 +61,7 @@ export const NotFound = ({ ruta }: NotFoundProps) => {
         <div className="flex flex-wrap gap-3 justify-center mt-9">
           <a
             href="/"
-            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-[#a3ff12] text-[#0a0f1c] font-bold text-[15px] no-underline transition-transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[#a3ff12] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-[#baf413] text-[#0a0f1c] font-bold text-[15px] no-underline transition-transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[#baf413] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
           >
             Volver al mapa
           </a>

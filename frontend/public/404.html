@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0f172a" />
+    <meta name="theme-color" content="#070f18" />
     <meta name="robots" content="noindex" />
     <title>Spot no encontrado · urbanFlow</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -18,12 +18,12 @@
          Esta página es estática a propósito — la sirve el servidor antes de que
          React arranque, así que no puede importar nada del bundle. */
       :root {
-        --bg: #0f172a;
-        --card: #1e293b;
-        --borde: #334155;
-        --accent: #a3ff12;
-        --texto: #f8fafc;
-        --tenue: #94a3b8;
+        --bg: #070f18;
+        --card: #131b24;
+        --borde: #2a343e;
+        --accent: #baf413;
+        --texto: #f2f5f7;
+        --tenue: #8a97a6;
       }
 
       * { box-sizing: border-box; }
@@ -48,8 +48,8 @@
         position: absolute;
         inset: 0;
         background-image:
-          repeating-linear-gradient(0deg, rgba(163, 255, 18, 0.07) 0 1px, transparent 1px 48px),
-          repeating-linear-gradient(90deg, rgba(163, 255, 18, 0.07) 0 1px, transparent 1px 48px);
+          repeating-linear-gradient(0deg, rgba(186, 244, 19, 0.07) 0 1px, transparent 1px 48px),
+          repeating-linear-gradient(90deg, rgba(186, 244, 19, 0.07) 0 1px, transparent 1px 48px);
         mask-image: radial-gradient(75% 60% at 50% 45%, #000 0%, transparent 75%);
         -webkit-mask-image: radial-gradient(75% 60% at 50% 45%, #000 0%, transparent 75%);
         pointer-events: none;
@@ -90,7 +90,7 @@
         letter-spacing: -0.05em;
         color: var(--accent);
         margin: 0;
-        text-shadow: 0 0 60px rgba(163, 255, 18, 0.28);
+        text-shadow: 0 0 60px rgba(186, 244, 19, 0.28);
       }
 
       .etiqueta {
@@ -144,7 +144,7 @@
         color: #0a0f1c;
       }
 
-      a.principal:hover { transform: translateY(-2px); background: #b4ff3d; }
+      a.principal:hover { transform: translateY(-2px); background: #cbf95a; }
 
       a.secundario {
         background: var(--card);
@@ -163,7 +163,7 @@
         margin-top: 34px;
         font-family: "JetBrains Mono", ui-monospace, monospace;
         font-size: 12px;
-        color: #64748b;
+        color: #6b7885;
         word-break: break-all;
       }
 
