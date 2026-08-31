@@ -1,3 +1,4 @@
+import React from 'react';
 import { MapPin, Navigation } from 'lucide-react';
 import { Spot } from '../types';
 import { CATEGORIES } from '../constants';
@@ -11,8 +12,6 @@ interface PopupSpotProps {
   onVerDetalle: (spot: Spot) => void;
 }
 
-const IMAGEN_POR_DEFECTO =
-  'https://images.unsplash.com/photo-1520156584189-1ee29241274c?auto=format&fit=crop&q=80&w=600';
 
 /** Convierte el array JSON que guarda `category` en nombres legibles. */
 function nombresDeCategoria(category: string): string[] {
@@ -47,13 +46,18 @@ export const PopupSpot = ({
         onClick={() => onVerDetalle(spot)}
         className="block w-full text-left"
       >
-        <div className="relative h-28 w-full overflow-hidden bg-slate-800">
-          <img
-            src={spot.image_url || IMAGEN_POR_DEFECTO}
-            alt=""
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
+        {/* Igual que en la tarjeta: sin foto propia, marcador, no stock. */}
+        <div className="relative h-28 w-full overflow-hidden bg-slate-800 flex items-center justify-center">
+          {spot.image_url ? (
+            <img
+              src={spot.image_url}
+              alt=""
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          ) : (
+            <MapPin className="w-8 h-8 text-slate-600" />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent" />
         </div>
 

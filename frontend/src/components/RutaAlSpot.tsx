@@ -1,3 +1,4 @@
+import React from 'react';
 import { AlertTriangle, Bike, Bus, Car, Footprints, Loader2, MapPin, Navigation, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Spot } from '../types';

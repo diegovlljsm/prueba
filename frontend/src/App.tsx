@@ -41,7 +41,8 @@ import {
   Trash2,
   LogIn,
   UserPlus,
-  ArrowRight
+  ArrowRight,
+  SlidersHorizontal
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from './lib/utils';
@@ -56,9 +57,16 @@ import { AuthScreen } from './components/AuthScreen';
 import { AddSpotForm } from './components/AddSpotForm';
 import { PopupSpot } from './components/PopupSpot';
 import { RutaAlSpot } from './components/RutaAlSpot';
+import { TarjetaSpot } from './components/TarjetaSpot';
+import {
+  PanelFiltros,
+  FILTROS_VACIOS,
+  hayFiltrosActivos,
+  type Filtros,
+} from './components/PanelFiltros';
 import { useAuth } from './hooks/useAuth';
-import { useRuta } from './hooks/useRuta';
-import { distanciaAlUsuario } from './lib/geo';
+import { useRuta, type ModoViaje } from './hooks/useRuta';
+import { distanciaAlUsuario, distanciaEnMetros } from './lib/geo';
 import { api } from './services/api';
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
@@ -101,7 +109,7 @@ export default function App() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [userLocation, setUserLocation] = useState({ lat: -33.4489, lng: -70.6693 });
   const [currentUserLocation, setCurrentUserLocation] = useState<{lat: number, lng: number} | null>(null);
-  const [activeTab, setActiveTab] = useState<'map' | 'list' | 'events' | 'admin' | 'community'>('map');
+  const [activeTab, setActiveTab] = useState<'map' | 'list' | 'events' | 'admin' | 'community' | 'add'>('map');
   const [hoveredSpot, setHoveredSpot] = useState<Spot | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [showMobileOverlay, setShowMobileOverlay] = useState(false);
@@ -122,6 +130,50 @@ export default function App() {
   const ruta = useRuta();
 
   const ubicacionUsuario = ubicacionEsReal ? userLocation : null;
+
+  const [filtros, setFiltros] = useState<Filtros>(FILTROS_VACIOS);
+  const [mostrarFiltros, setMostrarFiltros] = useState(false);
+
+  /** ¿Este spot pasa el juego de filtros dado? */
+  const cumpleFiltros = useCallback(
+    (spot: Spot, f: Filtros): boolean => {
+      if (f.soloConFoto && !spot.image_url) return false;
+
+      if (f.categorias.length > 0) {
+        let categoriasDelSpot: string[];
+        try {
+          const parseado = JSON.parse(spot.category);
+          categoriasDelSpot = Array.isArray(parseado) ? parseado : [spot.category];
+        } catch {
+          categoriasDelSpot = [spot.category];
+        }
+        // Basta con que coincida una: filtrar por "skate o BMX" es lo que
+        // espera cualquiera al marcar dos casillas.
+        if (!f.categorias.some((c) => categoriasDelSpot.includes(c))) return false;
+      }
+
+      if (f.radioMetros !== null && ubicacionUsuario) {
+        const metros = distanciaEnMetros(ubicacionUsuario, { lat: spot.lat, lng: spot.lng });
+        if (metros > f.radioMetros) return false;
+      }
+
+      return true;
+    },
+    [ubicacionUsuario]
+  );
+
+  // Filtrar en el cliente es correcto a esta escala: el servidor ya devolvió
+  // un conjunto acotado. Cuando el mapa crezca, el filtro por distancia pasa a
+  // `GET /api/spots?near=&radius=`, que sí usa el índice espacial de PostGIS.
+  const spotsFiltrados = useMemo(
+    () => spots.filter((s) => cumpleFiltros(s, filtros)),
+    [spots, filtros, cumpleFiltros]
+  );
+
+  const contarResultados = useCallback(
+    (f: Filtros) => spots.filter((s) => cumpleFiltros(s, f)).length,
+    [spots, cumpleFiltros]
+  );
 
   /** Abre el panel de ruta y calcula el trayecto desde donde está el usuario. */
   const handleComoLlegar = useCallback(
@@ -144,7 +196,7 @@ export default function App() {
 
   /** Cambiar de modo recalcula sobre el mismo destino. */
   const handleCambiarModoRuta = useCallback(
-    (modo: Parameters<typeof ruta.setModo>[0]) => {
+    (modo: ModoViaje) => {
       if (spotEnRuta && ubicacionUsuario) {
         ruta.calcular(ubicacionUsuario, { lat: spotEnRuta.lat, lng: spotEnRuta.lng }, modo);
       } else {
@@ -225,6 +277,24 @@ export default function App() {
       console.error('Error fetching spot videos:', error);
     }
   }, [api]);
+
+  /**
+   * Abre un spot desde cualquier lista: lo selecciona, trae sus clips y centra
+   * el mapa en él. Antes esto estaba copiado en cada lista, con el riesgo de
+   * que una se quedara sin el `panTo` y el mapa no siguiera a la selección.
+   */
+  const abrirSpot = useCallback(
+    (spot: Spot) => {
+      setSelectedSpot(spot);
+      setSelectedEvent(null);
+      fetchSpotVideos(spot.id);
+      if (map) {
+        map.panTo({ lat: spot.lat, lng: spot.lng });
+        map.setZoom(16);
+      }
+    },
+    [map, fetchSpotVideos]
+  );
 
   /** Del globo del mapa a la ficha completa del spot. */
   const handleVerDetalleDesdePopup = useCallback(
@@ -543,32 +613,16 @@ export default function App() {
                   <h2 className="text-xs font-semibold text-slate-500 uppercase px-2 flex items-center gap-2">
                     <MapPin className="w-3 h-3" /> Spots Cercanos
                   </h2>
-                  {spots.slice(0, 5).map(spot => (
-                    <button
+                  {spotsFiltrados.slice(0, 5).map(spot => (
+                    <TarjetaSpot
                       key={spot.id}
-                      onClick={() => {
-                        setSelectedSpot(spot);
-                        setSelectedEvent(null);
-                        fetchSpotVideos(spot.id);
-                        if (map) {
-                          map.panTo({ lat: spot.lat, lng: spot.lng });
-                          map.setZoom(16);
-                        }
-                      }}
-                      className="w-full text-left p-3 rounded-xl hover:bg-slate-800 transition-colors group border border-transparent hover:border-slate-700"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="font-medium text-slate-200 group-hover:text-emerald-400 transition-colors">{spot.name}</h3>
-                          <p className="text-xs text-slate-500 line-clamp-1">{[distanciaAlUsuario({ lat: spot.lat, lng: spot.lng }, ubicacionUsuario), spot.description].filter(Boolean).join(" · ")}</p>
-                        </div>
-                        <span className="text-[10px] bg-slate-800 px-2 py-1 rounded-full text-slate-400 uppercase font-mono">
-                          {parseCategories(spot.category)}
-                        </span>
-                      </div>
-                    </button>
+                      spot={spot}
+                      ubicacionUsuario={ubicacionUsuario}
+                      activo={selectedSpot?.id === spot.id}
+                      onSelect={abrirSpot}
+                    />
                   ))}
-                  {spots.length > 5 && (
+                  {spotsFiltrados.length > 5 && (
                     <button 
                       onClick={() => setActiveTab('list')}
                       className="w-full text-center py-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-emerald-400 transition-colors"
@@ -622,33 +676,38 @@ export default function App() {
 
             {!selectedSpot && !selectedEvent && !isAddingSpot && !showAdminPanel && activeTab === 'list' && (
               <div className="space-y-2">
-                <h2 className="text-xs font-semibold text-slate-500 uppercase px-2 flex items-center gap-2">
-                  <Compass className="w-3 h-3" /> Todos los Spots
-                </h2>
-                {spots.map(spot => (
+                <div className="flex items-center justify-between px-2">
+                  <h2 className="text-xs font-semibold text-slate-500 uppercase flex items-center gap-2">
+                    <Compass className="w-3 h-3" />
+                    {hayFiltrosActivos(filtros) ? `${spotsFiltrados.length} de ${spots.length} spots` : 'Todos los Spots'}
+                  </h2>
                   <button
-                    key={spot.id}
-                    onClick={() => {
-                      setSelectedSpot(spot);
-                      setSelectedEvent(null);
-                      fetchSpotVideos(spot.id);
-                      if (map) {
-                        map.panTo({ lat: spot.lat, lng: spot.lng });
-                        map.setZoom(16);
-                      }
-                    }}
-                    className="w-full text-left p-3 rounded-xl hover:bg-slate-800 transition-colors group border border-transparent hover:border-slate-700"
+                    onClick={() => setMostrarFiltros(true)}
+                    className={cn(
+                      'flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-full border transition-colors',
+                      hayFiltrosActivos(filtros)
+                        ? 'border-emerald-500 text-emerald-500 bg-emerald-500/10'
+                        : 'border-slate-800 text-slate-400 hover:border-slate-700'
+                    )}
                   >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-medium text-slate-200 group-hover:text-emerald-400 transition-colors">{spot.name}</h3>
-                        <p className="text-xs text-slate-500 line-clamp-1">{[distanciaAlUsuario({ lat: spot.lat, lng: spot.lng }, ubicacionUsuario), spot.description].filter(Boolean).join(" · ")}</p>
-                      </div>
-                      <span className="text-[10px] bg-slate-800 px-2 py-1 rounded-full text-slate-400 uppercase font-mono">
-                        {parseCategories(spot.category)}
-                      </span>
-                    </div>
+                    <SlidersHorizontal className="w-3 h-3" /> Filtros
                   </button>
+                </div>
+
+                {spotsFiltrados.length === 0 && (
+                  <p className="text-sm text-slate-500 px-2 py-8 text-center">
+                    Ningún spot coincide con los filtros.
+                  </p>
+                )}
+
+                {spotsFiltrados.map(spot => (
+                  <TarjetaSpot
+                    key={spot.id}
+                    spot={spot}
+                    ubicacionUsuario={ubicacionUsuario}
+                    activo={selectedSpot?.id === spot.id}
+                    onSelect={abrirSpot}
+                  />
                 ))}
               </div>
             )}
@@ -824,7 +883,7 @@ export default function App() {
                 gestureHandling={'greedy'}
                 clickableIcons={false}
               >
-                {spots.map(spot => (
+                {spotsFiltrados.map(spot => (
                   <Marker
                     key={spot.id}
                     position={{ lat: spot.lat, lng: spot.lng }}
@@ -837,9 +896,14 @@ export default function App() {
                       setSpotEnPopup(spot);
                     }}
                     onMouseOver={(e) => {
-                      if (window.innerWidth >= 768 && !spotEnPopup) {
+                      // `domEvent` puede ser táctil o de teclado, no solo de
+                      // ratón: sin esta comprobación, en un dispositivo táctil
+                      // el tooltip se colocaba en (undefined, undefined) y
+                      // saltaba a la esquina superior izquierda.
+                      const evento = e.domEvent;
+                      if (window.innerWidth >= 768 && !spotEnPopup && 'clientX' in evento) {
                         setHoveredSpot(spot);
-                        setMousePos({ x: e.domEvent.clientX, y: e.domEvent.clientY });
+                        setMousePos({ x: evento.clientX, y: evento.clientY });
                       }
                     }}
                     onMouseOut={() => setHoveredSpot(null)}
@@ -1077,25 +1141,43 @@ export default function App() {
                         />
                       ) : activeTab === 'list' ? (
                         <div className="space-y-4">
-                        <h2 className="text-xl font-bold">Explorar Spots</h2>
-                        <div className="grid gap-3">
-                          {spots.map(spot => (
-                            <button
+                        <div className="flex items-center justify-between">
+                          <h2 className="text-xl font-bold">
+                            {hayFiltrosActivos(filtros)
+                              ? `${spotsFiltrados.length} de ${spots.length} spots`
+                              : 'Explorar Spots'}
+                          </h2>
+                          <button
+                            onClick={() => setMostrarFiltros(true)}
+                            className={cn(
+                              'flex items-center gap-2 text-xs font-black uppercase tracking-widest px-3.5 py-2 rounded-full border transition-colors',
+                              hayFiltrosActivos(filtros)
+                                ? 'border-emerald-500 text-emerald-500 bg-emerald-500/10'
+                                : 'border-slate-800 text-slate-400'
+                            )}
+                          >
+                            <SlidersHorizontal className="w-3.5 h-3.5" /> Filtros
+                          </button>
+                        </div>
+
+                        {spotsFiltrados.length === 0 && (
+                          <p className="text-sm text-slate-500 py-10 text-center">
+                            Ningún spot coincide con los filtros.
+                          </p>
+                        )}
+
+                        <div className="grid gap-1">
+                          {spotsFiltrados.map(spot => (
+                            <TarjetaSpot
                               key={spot.id}
-                              onClick={() => {
-                                setSelectedSpot(spot);
-                                fetchSpotVideos(spot.id);
+                              spot={spot}
+                              ubicacionUsuario={ubicacionUsuario}
+                              activo={selectedSpot?.id === spot.id}
+                              onSelect={(s) => {
+                                abrirSpot(s);
                                 setIsOverlayMinimized(true);
-                                if (map) {
-                                  map.panTo({ lat: spot.lat, lng: spot.lng });
-                                  map.setZoom(16);
-                                }
                               }}
-                              className="w-full text-left p-4 bg-slate-800/50 border border-slate-800 rounded-2xl"
-                            >
-                              <h3 className="font-bold text-emerald-400">{spot.name}</h3>
-                              <p className="text-xs text-slate-500">{parseCategories(spot.category)}</p>
-                            </button>
+                            />
                           ))}
                         </div>
                       </div>
@@ -1550,6 +1632,42 @@ export default function App() {
         </AnimatePresence>
       </motion.div>
     )}
+    </AnimatePresence>
+
+    {/* Panel de filtros: hoja inferior en móvil, lateral en escritorio. */}
+    <AnimatePresence>
+      {mostrarFiltros && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setMostrarFiltros(false)}
+            className="fixed inset-0 z-[4500] bg-black/60"
+          />
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 40 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+            className="fixed z-[4600] border border-slate-800 overflow-hidden
+                       inset-x-0 bottom-0 top-auto h-[80vh] rounded-t-[28px]
+                       md:inset-y-4 md:right-auto md:left-4 md:h-auto md:w-[380px] md:rounded-[28px]
+                       shadow-[0_20px_60px_rgba(0,0,0,0.6)]"
+          >
+            <PanelFiltros
+              filtros={filtros}
+              contarResultados={contarResultados}
+              hayUbicacion={Boolean(ubicacionUsuario)}
+              onAplicar={(f) => {
+                setFiltros(f);
+                setMostrarFiltros(false);
+              }}
+              onCerrar={() => setMostrarFiltros(false)}
+            />
+          </motion.div>
+        </>
+      )}
     </AnimatePresence>
 
     {/* Panel de ruta: lateral en escritorio, hoja inferior en móvil.

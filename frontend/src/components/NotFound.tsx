@@ -1,3 +1,4 @@
+import React from 'react';
 import { SkaterLogo } from './SkaterLogo';
 
 interface NotFoundProps {

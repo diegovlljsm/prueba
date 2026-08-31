@@ -233,3 +233,20 @@ Entradas nuevas al final. Formato:
   JavaScript API, hay que habilitar la **Directions API** en la misma clave de
   Google. Son dos servicios distintos; sin el segundo, "Cómo llegar" responde
   REQUEST_DENIED y el panel lo dice explícitamente.
+- **2026-08-30** — [FEAT-009] Implementado el panel de filtros de la maqueta:
+  tipo de spot, distancia y solo-con-foto, con contador en vivo ("Mostrar 2
+  spots") y aplicación diferida. Filtra a la vez los marcadores del mapa y las
+  listas. No se implementaron los filtros de dificultad, afluencia y
+  calificación que muestra la maqueta: esos campos no existen en la base, y un
+  filtro que no filtra es peor que no ofrecerlo.
+- **2026-08-30** — Creada `TarjetaSpot`, la fila de la maqueta con miniatura,
+  ubicación y distancia. Sustituye las dos listas duplicadas de escritorio y la
+  de móvil. Sin foto propia pinta un marcador en vez de una imagen de stock:
+  una foto de otro skatepark haría pasar por real algo que no lo es.
+- **2026-08-30** — Descubierto que el proyecto **no tenía `@types/react`
+  instalado**. Sin esos tipos, TypeScript no validaba nada de JSX. Al
+  instalarlos afloraron tres errores latentes en el código original: `activeTab`
+  se ponía a `'add'`, un valor fuera de su propio tipo; y el tooltip del mapa
+  leía `clientX` de un evento que puede ser táctil o de teclado, con lo que en
+  un dispositivo táctil saltaba a la esquina de la pantalla. Los tres
+  corregidos.
