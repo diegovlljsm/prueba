@@ -196,3 +196,22 @@ Entradas nuevas al final. Formato:
   `main` solo para estado estable. Ambas quedan en el mismo commit de partida.
   Añadido `.gitattributes` para normalizar los saltos de línea entre el Windows
   de Alfredo y el macOS de Diego.
+- **2026-08-30** — Diagnosticado y corregido el 404 de consola: era
+  `GET /favicon.ico`, no había icono. Añadido `favicon.svg` con la marca y
+  declarado en `index.html`, que es lo que hace que el navegador deje de
+  pedirlo a ciegas.
+- **2026-08-30** — Descubierto que `index.css` declaraba Inter y JetBrains Mono
+  como fuentes del tema pero nadie las cargaba: la app entera caía a la fuente
+  del sistema. Cargadas desde Google Fonts en `index.html`.
+- **2026-08-30** — Creadas las páginas 404 con la identidad de urbanFlow:
+  `public/404.html` (estática, la sirve el servidor antes de que React
+  arranque) y `src/components/NotFound.tsx` (dentro de la app, para rutas
+  desconocidas). Título de la pestaña corregido: era "My Google AI Studio App".
+- **2026-08-30** — Causa del fallo de acceso con Google identificada por el
+  propio Firebase: `auth/unauthorized-domain`. El dominio `localhost` no está
+  en Authentication → Settings → Authorized domains del proyecto. Es
+  configuración de consola, no código. Pendiente para Alfredo.
+- **2026-08-30** — Reforzado `useAuth`: el error ya no se traga con un
+  `console.error`, se muestra al usuario con un mensaje accionable; hay reserva
+  por redirección cuando el navegador bloquea la ventana emergente (Brave y
+  Safari lo hacen por defecto), y se recoge el `getRedirectResult` al volver.

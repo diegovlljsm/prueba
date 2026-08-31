@@ -68,7 +68,9 @@ export default function App() {
   const { 
     user, 
     isGuest, 
-    isLoadingAuth, 
+    isLoadingAuth,
+    isSigningIn,
+    authError,
     showAuthScreen, 
     isAdmin, 
     handleGoogleSignIn, 
@@ -1465,9 +1467,11 @@ export default function App() {
     </AnimatePresence>
 
     {/* Auth Selection Screen */}
-    <AuthScreen 
+    <AuthScreen
       show={showAuthScreen}
       isLoadingAuth={isLoadingAuth}
+      isSigningIn={isSigningIn}
+      authError={authError}
       onGoogleSignIn={handleGoogleSignIn}
       onContinueAsGuest={handleContinueAsGuest}
     />

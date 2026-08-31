@@ -1,16 +1,27 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowRight, Users } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Loader2, Users } from 'lucide-react';
 import { SkaterLogo } from './SkaterLogo';
 
 interface AuthScreenProps {
   show: boolean;
   isLoadingAuth: boolean;
+  /** Hay un acceso en curso: bloquea el botón para no abrir dos ventanas. */
+  isSigningIn?: boolean;
+  /** Mensaje legible cuando el acceso falla. Null si no hay error. */
+  authError?: string | null;
   onGoogleSignIn: () => void;
   onContinueAsGuest: () => void;
 }
 
-export const AuthScreen = ({ show, isLoadingAuth, onGoogleSignIn, onContinueAsGuest }: AuthScreenProps) => {
+export const AuthScreen = ({
+  show,
+  isLoadingAuth,
+  isSigningIn = false,
+  authError = null,
+  onGoogleSignIn,
+  onContinueAsGuest,
+}: AuthScreenProps) => {
   return (
     <AnimatePresence>
       {show && !isLoadingAuth && (
@@ -45,14 +56,43 @@ export const AuthScreen = ({ show, isLoadingAuth, onGoogleSignIn, onContinueAsGu
               Explora, graba y comparte los mejores spots de la ciudad.
             </p>
 
+            {/* El acceso puede fallar por configuración del proyecto o por un
+                bloqueo del navegador. Antes eso solo se veía en la consola y
+                el botón parecía muerto. */}
+            <AnimatePresence>
+              {authError && (
+                <motion.div
+                  role="alert"
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  className="mb-6 flex items-start gap-3 text-left bg-red-500/10 border border-red-500/25 rounded-2xl px-4 py-3.5"
+                >
+                  <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-200 leading-relaxed">{authError}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <div className="space-y-4">
               <button
                 onClick={onGoogleSignIn}
-                className="w-full bg-white text-black py-5 rounded-[28px] font-black flex items-center justify-center gap-4 shadow-xl hover:bg-slate-100 active:scale-95 transition-all group"
+                disabled={isSigningIn}
+                aria-busy={isSigningIn}
+                className="w-full bg-white text-black py-5 rounded-[28px] font-black flex items-center justify-center gap-4 shadow-xl hover:bg-slate-100 active:scale-95 transition-all group disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100"
               >
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-6 h-6" />
-                <span className="text-lg">Continuar con Google</span>
-                <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                {isSigningIn ? (
+                  <>
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                    <span className="text-lg">Conectando con Google…</span>
+                  </>
+                ) : (
+                  <>
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" className="w-6 h-6" />
+                    <span className="text-lg">Continuar con Google</span>
+                    <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                  </>
+                )}
               </button>
 
               <div className="flex items-center gap-4 py-4">
