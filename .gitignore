@@ -1,0 +1,31 @@
+# Dependencias y compilados
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Entorno: se versiona .env.example, nunca el .env real
+.env
+.env.*
+!.env.example
+
+# Credenciales de servicio (Firebase Admin, etc.)
+backend/secrets/*
+!backend/secrets/.gitkeep
+serviceAccountKey.json
+*serviceAccount*.json
+
+# Cachés de herramientas
+.vite/
+.expo/
+.turbo/
+
+# Sistema y editores
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+
+# Ajustes locales de Claude Code (permisos por máquina)
+.claude/settings.local.json

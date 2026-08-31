@@ -1,0 +1,87 @@
+{
+  "entities": {
+    "users": {
+      "title": "User",
+      "description": "Application users",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "spots": {
+      "title": "Spot",
+      "description": "Urban sports spots (skate, BMX, parkour, etc.)",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "category": { "type": "string" },
+        "marker_color": { "type": "string" },
+        "show_label": { "type": "boolean" },
+        "image_url": { "type": "string" },
+        "location_name": { "type": "string" },
+        "floor_quality": { "type": "string" },
+        "obstacles": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "lat", "lng", "category", "createdBy"]
+    },
+    "events": {
+      "title": "Event",
+      "description": "Community events (jams, contests, workshops)",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "location_name": { "type": "string" },
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "category": { "type": "string", "enum": ["jam", "contest", "workshop"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "date", "lat", "lng"]
+    },
+    "videos": {
+      "title": "VideoClip",
+      "description": "User-submitted video clips awaiting or having passed moderation",
+      "type": "object",
+      "properties": {
+        "spot_id": { "type": "string" },
+        "video_url": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "user_name": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["spot_id", "video_url", "status", "createdBy"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "users",
+      "description": "User profile documents"
+    },
+    "spots/{spotId}": {
+      "schema": "spots",
+      "description": "Urban sports spot documents"
+    },
+    "events/{eventId}": {
+      "schema": "events",
+      "description": "Community event documents"
+    },
+    "videos/{videoId}": {
+      "schema": "videos",
+      "description": "Video clip submission documents"
+    }
+  }
+}

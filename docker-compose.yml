@@ -1,0 +1,71 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: urbanflow-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-urbanflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-urbanflow}
+      POSTGRES_DB: ${POSTGRES_DB:-urbanflow}
+    ports:
+      # Expuesto al host para poder inspeccionar la base con psql, DBeaver o
+      # TablePlus mientras se desarrolla.
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # La API espera a que esto pase antes de arrancar: la primera vez,
+      # Postgres tarda unos segundos en inicializar el volumen.
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-urbanflow} -d ${POSTGRES_DB:-urbanflow}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+  api:
+    build:
+      context: ./backend
+    container_name: urbanflow-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 8080
+      # 'db' es el nombre del servicio: dentro de la red de Compose resuelve
+      # al contenedor de Postgres. Desde el host sería localhost:5432.
+      DATABASE_URL: postgres://${POSTGRES_USER:-urbanflow}:${POSTGRES_PASSWORD:-urbanflow}@db:5432/${POSTGRES_DB:-urbanflow}
+      AUTH_MODE: ${AUTH_MODE:-dev}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:3000}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-}
+      # Solo se usa con AUTH_MODE=firebase, apuntando al fichero montado abajo.
+      GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS:-}
+    ports:
+      - "8080:8080"
+    volumes:
+      # Recarga en caliente: tsx vigila estos ficheros. node_modules vive
+      # dentro de la imagen y no se pisa porque solo montamos src.
+      - ./backend/src:/app/src:ro
+      # Clave de servicio de Firebase, si algún día se usa AUTH_MODE=firebase.
+      # El fichero es opcional; si no existe, Docker crea un directorio vacío
+      # y no pasa nada mientras AUTH_MODE siga en dev.
+      - ./backend/secrets:/app/secrets:ro
+
+  adminer:
+    # Cliente web para mirar las tablas sin instalar nada: http://localhost:8081
+    # Servidor: db · Usuario y contraseña: los de arriba · Base: urbanflow
+    image: adminer:4
+    container_name: urbanflow-adminer
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8081:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+
+volumes:
+  pgdata:

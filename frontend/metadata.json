@@ -1,0 +1,5 @@
+{
+  "name": "UrbanFlow",
+  "description": "Waze for urban sports: find spots, upload clips, and get authorized by the community.",
+  "requestFramePermissions": ["geolocation"]
+}

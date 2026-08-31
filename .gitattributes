@@ -1,0 +1,19 @@
+# Normaliza los saltos de línea: el repositorio guarda siempre LF y cada
+# máquina usa lo suyo al sacar los ficheros. Sin esto, Alfredo trabaja en
+# Windows (CRLF) y Diego en macOS (LF), y cada commit ensucia el diff entero.
+* text=auto eol=lf
+
+# Binarios: git no debe tocarlos nunca.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.ico  binary
+*.pdf  binary
+*.woff  binary
+*.woff2 binary
+*.mp4  binary
+
+# El lockfile es generado: colapsarlo en las revisiones de código.
+package-lock.json linguist-generated=true -diff

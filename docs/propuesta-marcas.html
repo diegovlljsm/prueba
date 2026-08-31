@@ -1,0 +1,1323 @@
+<title>Dossier urbanFlow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+
+<style>
+  :root {
+    --papel:        #EFEEE9;
+    --papel-alt:    #E5E4DE;
+    --superficie:   #FAFAF8;
+    --tinta:        #14171A;
+    --tinta-media:  #3D444B;
+    --tinta-tenue:  #6A7178;
+    --linea:        #D3D1C9;
+    --linea-fuerte: #B4B1A7;
+    --marca:        #F2C200;
+    --marca-suave:  #FBEFB4;
+    --alerta:       #A83718;
+    --alerta-suave: #F6E1DA;
+    --ok:           #1D6647;
+    --ok-suave:     #DDEDE4;
+    --sombra:       0 1px 0 rgba(20,23,26,.06), 0 8px 24px -18px rgba(20,23,26,.5);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --papel:        #101315;
+      --papel-alt:    #16191C;
+      --superficie:   #1A1E21;
+      --tinta:        #EDECE7;
+      --tinta-media:  #B4BAC0;
+      --tinta-tenue:  #868D94;
+      --linea:        #282D31;
+      --linea-fuerte: #3A4045;
+      --marca:        #F2C200;
+      --marca-suave:  #3A3111;
+      --alerta:       #E87A5C;
+      --alerta-suave: #331A12;
+      --ok:           #55BE90;
+      --ok-suave:     #122A20;
+      --sombra:       0 1px 0 rgba(0,0,0,.4), 0 8px 24px -18px rgba(0,0,0,.9);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --papel:        #101315;
+    --papel-alt:    #16191C;
+    --superficie:   #1A1E21;
+    --tinta:        #EDECE7;
+    --tinta-media:  #B4BAC0;
+    --tinta-tenue:  #868D94;
+    --linea:        #282D31;
+    --linea-fuerte: #3A4045;
+    --marca:        #F2C200;
+    --marca-suave:  #3A3111;
+    --alerta:       #E87A5C;
+    --alerta-suave: #331A12;
+    --ok:           #55BE90;
+    --ok-suave:     #122A20;
+    --sombra:       0 1px 0 rgba(0,0,0,.4), 0 8px 24px -18px rgba(0,0,0,.9);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--papel);
+    color: var(--tinta);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 16.5px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- Estructura ---------- */
+
+  .lamina {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 clamp(20px, 5vw, 56px);
+  }
+
+  .col {
+    max-width: 68ch;
+  }
+
+  section.bloque {
+    padding: clamp(48px, 7vw, 88px) 0;
+    border-top: 1px solid var(--linea);
+  }
+
+  .cabecera-bloque {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+    margin-bottom: clamp(24px, 4vw, 40px);
+  }
+
+  .num {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .16em;
+    color: var(--tinta-tenue);
+    text-transform: uppercase;
+  }
+
+  h2 {
+    font-family: "Archivo Black", "Arial Black", ui-sans-serif, sans-serif;
+    font-size: clamp(28px, 4.6vw, 46px);
+    line-height: 1.02;
+    letter-spacing: -.02em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  h3 {
+    font-family: "IBM Plex Sans", ui-sans-serif, sans-serif;
+    font-size: clamp(18px, 2.2vw, 21px);
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -.01em;
+    margin: 40px 0 12px;
+    text-wrap: balance;
+  }
+
+  h4 {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--tinta-tenue);
+    margin: 0 0 10px;
+  }
+
+  p { margin: 0 0 18px; }
+  p:last-child { margin-bottom: 0; }
+
+  strong { font-weight: 600; }
+
+  em { font-style: italic; }
+
+  a {
+    color: var(--tinta);
+    text-decoration-color: var(--linea-fuerte);
+    text-underline-offset: 3px;
+  }
+  a:hover { text-decoration-color: var(--marca); }
+  a:focus-visible {
+    outline: 2px solid var(--marca);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  .destacado {
+    background: linear-gradient(transparent 62%, var(--marca) 62%, var(--marca) 92%, transparent 92%);
+    color: var(--tinta);
+    padding: 0 1px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .destacado {
+      background: linear-gradient(transparent 62%, rgba(242,194,0,.32) 62%, rgba(242,194,0,.32) 92%, transparent 92%);
+    }
+  }
+  :root[data-theme="dark"] .destacado {
+    background: linear-gradient(transparent 62%, rgba(242,194,0,.32) 62%, rgba(242,194,0,.32) 92%, transparent 92%);
+  }
+
+  /* ---------- Portada ---------- */
+
+  .portada {
+    padding: clamp(56px, 10vw, 120px) 0 clamp(40px, 6vw, 64px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .portada::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, var(--linea) 0 1px, transparent 1px 40px),
+      repeating-linear-gradient(90deg, var(--linea) 0 1px, transparent 1px 40px);
+    opacity: .5;
+    mask-image: radial-gradient(120% 80% at 15% 0%, #000 0%, transparent 72%);
+    -webkit-mask-image: radial-gradient(120% 80% at 15% 0%, #000 0%, transparent 72%);
+    pointer-events: none;
+  }
+
+  .portada > * { position: relative; }
+
+  .sello {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--tinta-media);
+    border: 1px solid var(--linea-fuerte);
+    background: var(--superficie);
+    padding: 7px 14px;
+    margin-bottom: 28px;
+  }
+
+  .sello span.punto {
+    width: 7px; height: 7px;
+    background: var(--marca);
+    display: inline-block;
+  }
+
+  h1 {
+    font-family: "Archivo Black", "Arial Black", ui-sans-serif, sans-serif;
+    font-size: clamp(52px, 13vw, 132px);
+    line-height: .88;
+    letter-spacing: -.035em;
+    margin: 0 0 24px;
+  }
+
+  h1 .flow { color: var(--tinta-tenue); }
+
+  .bajada {
+    font-size: clamp(18px, 2.4vw, 22px);
+    line-height: 1.5;
+    max-width: 30ch;
+    color: var(--tinta);
+    margin-bottom: 36px;
+  }
+
+  .ficha-portada {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--linea);
+    border: 1px solid var(--linea);
+    max-width: 760px;
+  }
+
+  .ficha-portada div {
+    background: var(--superficie);
+    padding: 14px 16px;
+  }
+
+  .ficha-portada dt,
+  .ficha-portada .rotulo {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--tinta-tenue);
+    margin-bottom: 4px;
+  }
+
+  .ficha-portada .valor {
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  /* ---------- Tablas ---------- */
+
+  .tabla-envoltorio {
+    overflow-x: auto;
+    border: 1px solid var(--linea);
+    background: var(--superficie);
+    margin: 24px 0;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+    min-width: 560px;
+  }
+
+  caption {
+    caption-side: top;
+    text-align: left;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--tinta-tenue);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--linea);
+    background: var(--papel-alt);
+  }
+
+  th, td {
+    text-align: left;
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--linea);
+    vertical-align: top;
+  }
+
+  thead th {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--tinta-tenue);
+    background: var(--papel-alt);
+    white-space: nowrap;
+  }
+
+  tbody tr:last-child td { border-bottom: 0; }
+
+  tbody tr.recomendado td {
+    background: var(--marca-suave);
+  }
+
+  td.cifra, th.cifra {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  td.cifra strong { font-weight: 600; }
+
+  .renovacion { color: var(--alerta); }
+  .gratis { color: var(--ok); font-weight: 500; }
+
+  tfoot td {
+    background: var(--papel-alt);
+    font-weight: 600;
+    border-top: 2px solid var(--linea-fuerte);
+  }
+
+  /* ---------- Avisos ---------- */
+
+  .aviso {
+    border: 1px solid var(--linea-fuerte);
+    border-left: 5px solid var(--marca);
+    background: var(--superficie);
+    padding: 20px 24px;
+    margin: 28px 0;
+    box-shadow: var(--sombra);
+  }
+
+  .aviso.riesgo { border-left-color: var(--alerta); }
+  .aviso.bien   { border-left-color: var(--ok); }
+
+  .aviso h4 { color: var(--tinta); }
+
+  .aviso p { font-size: 15.5px; }
+
+  /* ---------- Rejillas de tarjetas ---------- */
+
+  .rejilla {
+    display: grid;
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .rejilla.dos  { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .rejilla.tres { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+  .tarjeta {
+    border: 1px solid var(--linea);
+    background: var(--superficie);
+    padding: 20px 22px;
+  }
+
+  .tarjeta .rotulo {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--tinta-tenue);
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .tarjeta h3 {
+    margin: 0 0 8px;
+    font-size: 17px;
+  }
+
+  .tarjeta p {
+    font-size: 14.5px;
+    color: var(--tinta-media);
+    margin: 0;
+  }
+
+  /* ---------- Diagramas ---------- */
+
+  .flujo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 0;
+    border: 1px solid var(--linea-fuerte);
+    background: var(--superficie);
+    margin: 28px 0;
+  }
+
+  .flujo .paso {
+    padding: 20px 20px 22px;
+    border-right: 1px solid var(--linea);
+    position: relative;
+  }
+  .flujo .paso:last-child { border-right: 0; }
+
+  .flujo .paso .n {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .14em;
+    color: var(--tinta-tenue);
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .flujo .paso .t {
+    font-weight: 600;
+    font-size: 15.5px;
+    display: block;
+    margin-bottom: 6px;
+    line-height: 1.25;
+  }
+
+  .flujo .paso .d {
+    font-size: 13.5px;
+    color: var(--tinta-media);
+    line-height: 1.5;
+  }
+
+  .flujo .paso.clave { background: var(--marca-suave); }
+  .flujo .paso.clave .n { color: var(--tinta-media); }
+
+  .pila {
+    border: 1px solid var(--linea-fuerte);
+    background: var(--superficie);
+    margin: 28px 0;
+  }
+
+  .capa {
+    display: grid;
+    grid-template-columns: 148px 1fr;
+    border-bottom: 1px solid var(--linea);
+  }
+  .capa:last-child { border-bottom: 0; }
+
+  .capa .etiqueta {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--tinta-tenue);
+    padding: 18px 16px;
+    background: var(--papel-alt);
+    border-right: 1px solid var(--linea);
+  }
+
+  .capa .piezas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 14px 16px;
+    align-items: flex-start;
+  }
+
+  .pieza {
+    border: 1px solid var(--linea-fuerte);
+    background: var(--papel);
+    padding: 7px 12px;
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  .pieza small {
+    display: block;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    font-weight: 400;
+    color: var(--tinta-tenue);
+    letter-spacing: .04em;
+    margin-top: 2px;
+  }
+
+  .pieza.acento {
+    background: var(--marca-suave);
+    border-color: var(--marca);
+  }
+
+  @media (max-width: 560px) {
+    .capa { grid-template-columns: 1fr; }
+    .capa .etiqueta { border-right: 0; border-bottom: 1px solid var(--linea); padding: 10px 16px; }
+  }
+
+  /* ---------- Listas ---------- */
+
+  ul.marcada, ol.marcada {
+    padding-left: 0;
+    list-style: none;
+    margin: 18px 0;
+  }
+
+  ul.marcada li, ol.marcada li {
+    position: relative;
+    padding-left: 26px;
+    margin-bottom: 12px;
+  }
+
+  ul.marcada li::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: .62em;
+    width: 9px;
+    height: 2px;
+    background: var(--marca);
+  }
+
+  ol.marcada { counter-reset: paso; }
+  ol.marcada li { counter-increment: paso; }
+  ol.marcada li::before {
+    content: counter(paso, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--tinta-tenue);
+    line-height: 1.9;
+  }
+
+  /* ---------- Cierre ---------- */
+
+  .cierre {
+    background: var(--tinta);
+    color: var(--papel);
+    padding: clamp(44px, 7vw, 80px) 0;
+    margin-top: 0;
+  }
+
+  .cierre h2 { color: var(--papel); }
+  .cierre .num { color: rgba(239,238,233,.55); }
+  .cierre p { color: rgba(239,238,233,.82); }
+  .cierre strong { color: var(--marca); font-weight: 600; }
+  .cierre a { color: var(--marca); text-decoration-color: rgba(242,194,0,.4); }
+  .cierre ol.marcada li::before { color: var(--marca); }
+
+  footer.pie {
+    padding: 40px 0 56px;
+    border-top: 1px solid var(--linea);
+    font-size: 13px;
+    color: var(--tinta-tenue);
+  }
+
+  footer.pie h4 { margin-top: 24px; }
+
+  footer.pie ul {
+    padding-left: 0;
+    list-style: none;
+    display: grid;
+    gap: 6px;
+  }
+
+  footer.pie a { color: var(--tinta-media); }
+
+  .nota-pie {
+    font-size: 13px;
+    color: var(--tinta-tenue);
+    margin-top: 10px;
+    line-height: 1.55;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<header class="portada">
+  <div class="lamina">
+    <div class="sello"><span class="punto"></span> Dossier técnico y comercial · v1.0 · 30 ago 2026</div>
+    <h1>urban<span class="flow">Flow</span></h1>
+    <p class="bajada">El mapa curado de los lugares donde la ciudad se usa como cancha.</p>
+    <div class="ficha-portada">
+      <div><div class="rotulo">Producto</div><div class="valor">App móvil iOS y Android</div></div>
+      <div><div class="rotulo">Fase</div><div class="valor">Definición · pre-desarrollo</div></div>
+      <div><div class="rotulo">Equipo</div><div class="valor">2 personas</div></div>
+      <div><div class="rotulo">Infra base</div><div class="valor">≈ 35 USD / mes</div></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- 01 ------------------------------------------------------------------ -->
+<section class="bloque">
+  <div class="lamina">
+    <div class="cabecera-bloque">
+      <div class="num">Lámina 01 — Propuesta</div>
+      <h2>Los spots existen. El mapa, no.</h2>
+    </div>
+    <div class="col">
+      <p>Cada ciudad tiene un bowl que nadie señaliza, un muro de calistenia que solo conocen veinte personas y una plaza que a las siete de la tarde es una pista de BMX. Esa información viaja de boca en boca, muere cuando alguien se muda y no existe para quien acaba de llegar.</p>
+
+      <p>Los mapas colaborativos abiertos lo intentaron y casi todos terminaron igual: publican sin filtro, se llenan de puntos falsos, duplicados y fotos de hace ocho años, y dejan de servir justo cuando empiezan a crecer.</p>
+
+      <h3>Qué hace urbanFlow distinto</h3>
+
+      <p><span class="destacado">El valor no está en el mapa: está en la curaduría.</span> Cada spot que sube un usuario pasa por una persona del equipo antes de existir para los demás. Es más lento, es más caro, y es exactamente la razón por la que el mapa sigue siendo útil en el año dos.</p>
+    </div>
+
+    <div class="flujo">
+      <div class="paso">
+        <span class="n">01</span>
+        <span class="t">Alguien encuentra un spot</span>
+        <span class="d">Y lo fotografía desde el propio lugar, con el teléfono en la mano.</span>
+      </div>
+      <div class="paso">
+        <span class="n">02</span>
+        <span class="t">Sube foto y ubicación</span>
+        <span class="d">Coordenada del GPS, del EXIF de la foto o del pin ajustado a mano.</span>
+      </div>
+      <div class="paso clave">
+        <span class="n">03</span>
+        <span class="t">El equipo lo verifica</span>
+        <span class="d">Aprobado, rechazado con motivo, o marcado como duplicado. Menos de 24 horas.</span>
+      </div>
+      <div class="paso">
+        <span class="n">04</span>
+        <span class="t">Entra en el mapa público</span>
+        <span class="d">Visible, con deporte, tipo de acceso y cómo llegar.</span>
+      </div>
+      <div class="paso">
+        <span class="n">05</span>
+        <span class="t">La comunidad lo mantiene</span>
+        <span class="d">Valora, actualiza y reporta lo que ya no existe.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 ------------------------------------------------------------------ -->
+<section class="bloque">
+  <div class="lamina">
+    <div class="cabecera-bloque">
+      <div class="num">Lámina 02 — Argumento comercial</div>
+      <h2>Lo que una marca no puede comprar con una campaña</h2>
+    </div>
+    <div class="col">
+      <p>Una marca de deporte de acción invierte millones en asociarse con la cultura urbana y mide el resultado en impresiones. urbanFlow ofrece otra cosa: <strong>el inventario verificado de dónde ocurre esa cultura</strong>, ciudad por ciudad, actualizado por quienes la practican.</p>
+
+      <p>No es una audiencia comprada. Es un registro de comportamiento real —qué se practica, dónde, con qué densidad y cómo cambia por temporada— sobre un público que las marcas de este sector persiguen y que desconfía por defecto de la publicidad convencional.</p>
+    </div>
+
+    <h3>Perfiles de marca a los que encaja</h3>
+    <div class="rejilla tres">
+      <div class="tarjeta">
+        <span class="rotulo">Perfil A</span>
+        <h3>Bebidas y deporte de acción</h3>
+        <p>Marcas cuyo relato ya está construido sobre skate, BMX y parkour. Buscan territorio propio y contenido de origen genuino, no producido.</p>
+      </div>
+      <div class="tarjeta">
+        <span class="rotulo">Perfil B</span>
+        <h3>Calzado y ropa deportiva</h3>
+        <p>Necesitan presencia en el momento y el lugar donde se usa el producto. Un mapa de spots es el punto de contacto más literal posible.</p>
+      </div>
+      <div class="tarjeta">
+        <span class="rotulo">Perfil C</span>
+        <h3>Equipamiento y tiendas locales</h3>
+        <p>Comercio de proximidad que quiere aparecer junto a los spots de su barrio. Ticket pequeño, volumen alto, venta directa.</p>
+      </div>
+      <div class="tarjeta">
+        <span class="rotulo">Perfil D</span>
+        <h3>Municipios y turismo deportivo</h3>
+        <p>Ayuntamientos que quieren visibilizar su infraestructura deportiva y saber cuál se usa de verdad. Presupuesto público, ciclo largo.</p>
+      </div>
+    </div>
+
+    <h3>Inventario de activaciones</h3>
+    <div class="tabla-envoltorio">
+      <table>
+        <caption>Formatos vendibles, ordenados de menor a mayor compromiso técnico</caption>
+        <thead>
+          <tr>
+            <th scope="col">Formato</th>
+            <th scope="col">Qué es</th>
+            <th scope="col">Desarrollo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Spot patrocinado</strong></td>
+            <td>Un skatepark o zona construida o renovada por la marca aparece destacado con su identidad y su historia.</td>
+            <td>Bajo</td>
+          </tr>
+          <tr>
+            <td><strong>Capa de eventos</strong></td>
+            <td>Competiciones, sesiones y activaciones aparecen en el mapa el día que ocurren, con caducidad automática.</td>
+            <td>Medio</td>
+          </tr>
+          <tr>
+            <td><strong>Reto geolocalizado</strong></td>
+            <td>Visitar N spots de una lista, subir prueba, desbloquear recompensa. Genera contenido y datos a la vez.</td>
+            <td>Medio</td>
+          </tr>
+          <tr>
+            <td><strong>Banco de imágenes</strong></td>
+            <td>Fotografía real de spots con licencia cedida por los autores, utilizable en campaña.</td>
+            <td>Bajo · requiere licencia explícita</td>
+          </tr>
+          <tr>
+            <td><strong>Informe de territorio</strong></td>
+            <td>Datos agregados y anónimos: densidad de spots por deporte y ciudad, crecimiento, estacionalidad.</td>
+            <td>Medio · requiere volumen</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="aviso riesgo">
+      <h4>Condición previa, no detalle legal</h4>
+      <p>El banco de imágenes y el informe de territorio solo son vendibles si las condiciones de uso incluyen desde el primer día una licencia explícita sobre las fotos y el consentimiento para el tratamiento agregado de los datos. Añadirlo después obliga a pedir permiso otra vez a cada usuario, y la mayoría no responde. Está registrado como <strong>REQ-004</strong> y <strong>REQ-011</strong>.</p>
+    </div>
+
+    <div class="col">
+      <h3>Qué se puede prometer y medir</h3>
+      <p>Spots verificados por ciudad y deporte · usuarios activos mensuales · nuevos spots por mes · visitas al detalle de un spot patrocinado · participación en retos · fotos subidas. Todo medible desde el primer día, sin depender de un tercero.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 03 ------------------------------------------------------------------ -->
+<section class="bloque">
+  <div class="lamina">
+    <div class="cabecera-bloque">
+      <div class="num">Lámina 03 — Arquitectura</div>
+      <h2>Qué hay que construir</h2>
+    </div>
+    <div class="col">
+      <p>Cuatro piezas de software y una base de datos con capacidades geográficas. Nada exótico: la complejidad real del proyecto no está en el stack, está en la moderación y en el cumplimiento de las tiendas.</p>
+    </div>
+
+    <div class="pila">
+      <div class="capa">
+        <div class="etiqueta">Cliente</div>
+        <div class="piezas">
+          <div class="pieza acento">App móvil<small>React Native + Expo</small></div>
+          <div class="pieza">Mapa<small>MapLibre / Mapbox</small></div>
+          <div class="pieza">Backoffice de moderación<small>web, uso interno</small></div>
+          <div class="pieza">Sitio público<small>landing + legales</small></div>
+        </div>
+      </div>
+      <div class="capa">
+        <div class="etiqueta">Borde</div>
+        <div class="piezas">
+          <div class="pieza">CDN y WAF<small>Cloudflare, plan gratuito</small></div>
+          <div class="pieza">Proxy inverso + TLS<small>Caddy o Traefik</small></div>
+        </div>
+      </div>
+      <div class="capa">
+        <div class="etiqueta">Aplicación</div>
+        <div class="piezas">
+          <div class="pieza acento">API REST<small>Node.js + TypeScript</small></div>
+          <div class="pieza">Autenticación<small>JWT + Sign in with Apple</small></div>
+          <div class="pieza">Worker de imágenes<small>compresión, WebP, sin EXIF</small></div>
+          <div class="pieza">Cola de trabajos<small>BullMQ sobre Redis</small></div>
+        </div>
+      </div>
+      <div class="capa">
+        <div class="etiqueta">Datos</div>
+        <div class="piezas">
+          <div class="pieza acento">PostgreSQL + PostGIS<small>fuente de verdad geográfica</small></div>
+          <div class="pieza">Redis<small>caché y colas</small></div>
+          <div class="pieza">Almacenamiento de objetos<small>fotos, compatible S3</small></div>
+        </div>
+      </div>
+      <div class="capa">
+        <div class="etiqueta">Operación</div>
+        <div class="piezas">
+          <div class="pieza">Docker Compose<small>despliegue en el VPS</small></div>
+          <div class="pieza">Copias de seguridad<small>diarias, fuera del servidor</small></div>
+          <div class="pieza">Errores y disponibilidad<small>Sentry + monitor externo</small></div>
+          <div class="pieza">Integración continua<small>GitHub Actions + EAS</small></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <h3>Por qué PostGIS y no dos columnas de latitud y longitud</h3>
+      <p>La consulta que más se ejecuta en toda la app es «dame los spots que caben en la pantalla», y se dispara cada vez que alguien arrastra el mapa. Con dos columnas numéricas y una fórmula de distancia, esa consulta recorre la tabla entera y deja de responder en cuanto hay unos miles de spots. Con una columna geográfica indexada, responde en milisegundos con cientos de miles. Es una decisión de arranque: cambiarla más tarde implica migrar los datos y reescribir las consultas.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 04 ------------------------------------------------------------------ -->
+<section class="bloque">
+  <div class="lamina">
+    <div class="cabecera-bloque">
+      <div class="num">Lámina 04 — Dimensionamiento</div>
+      <h2>Cuánto servidor hace falta, y cuándo</h2>
+    </div>
+    <div class="col">
+      <p>El consumo de esta app no lo marca el tráfico web: lo marcan las <strong>fotos</strong>. Cada spot son entre una y cinco imágenes que hay que recibir, procesar y servir. La memoria y el disco se agotan antes que la CPU.</p>
+    </div>
+
+    <div class="tabla-envoltorio">
+      <table>
+        <caption>Tres fases, con el salto de servidor en cada una</caption>
+        <thead>
+          <tr>
+            <th scope="col">Fase</th>
+            <th scope="col" class="cifra">Usuarios / mes</th>
+            <th scope="col" class="cifra">Spots</th>
+            <th scope="col">Servidor</th>
+            <th scope="col" class="cifra">Fotos</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Validación</strong><br><span class="nota-pie">Una ciudad, mapa sembrado a mano</span></td>
+            <td class="cifra">&lt; 1.000</td>
+            <td class="cifra">&lt; 500</td>
+            <td>1 VPS · 4 vCPU · 8 GB</td>
+            <td class="cifra">≈ 10 GB</td>
+          </tr>
+          <tr>
+            <td><strong>Crecimiento</strong><br><span class="nota-pie">Varias ciudades, primera marca</span></td>
+            <td class="cifra">1.000 – 20.000</td>
+            <td class="cifra">500 – 10.000</td>
+            <td>1 VPS · 8 vCPU · 24 GB<br><span class="nota-pie">+ staging aparte</span></td>
+            <td class="cifra">≈ 150 GB</td>
+          </tr>
+          <tr>
+            <td><strong>Escala</strong><br><span class="nota-pie">Región, contrato de marca activo</span></td>
+            <td class="cifra">&gt; 50.000</td>
+            <td class="cifra">&gt; 50.000</td>
+            <td>2 VPS separados<br><span class="nota-pie">base de datos aparte de la app</span></td>
+            <td class="cifra">&gt; 1 TB</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="aviso">
+      <h4>La regla que evita la sorpresa</h4>
+      <p>Las fotos <strong>no</strong> se guardan en el disco del servidor. Van a almacenamiento de objetos desde el primer día, aunque al principio sean cuatro. Si viven en el disco del VPS, el día que haya que cambiar de servidor la migración deja de ser una tarde y pasa a ser una semana, y las copias de seguridad se vuelven impracticables.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 05 ------------------------------------------------------------------ -->
+<section class="bloque">
+  <div class="lamina">
+    <div class="cabecera-bloque">
+      <div class="num">Lámina 05 — Proveedor de servidor</div>
+      <h2>Contabo frente a HostGator</h2>
+    </div>
+
+    <div class="tabla-envoltorio">
+      <table>
+        <caption>Contabo · Cloud VPS · precios consultados el 30 ago 2026 en contabo.com</caption>
+        <thead>
+          <tr>
+            <th scope="col">Plan</th>
+            <th scope="col" class="cifra">vCPU</th>
+            <th scope="col" class="cifra">RAM</th>
+            <th scope="col" class="cifra">Disco</th>
+            <th scope="col" class="cifra">Red</th>
+            <th scope="col" class="cifra">Precio / mes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Cloud VPS 4</td>
+            <td class="cifra">4</td>
+            <td class="cifra">8 GB</td>
+            <td class="cifra">100 GB SSD</td>
+            <td class="cifra">200 Mbit/s</td>
+            <td class="cifra"><strong>5,50 €</strong><br><span class="nota-pie">≈ 6 USD</span></td>
+          </tr>
+          <tr>
+            <td>Cloud VPS 6</td>
+            <td class="cifra">6</td>
+            <td class="cifra">12 GB</td>
+            <td class="cifra">200 GB SSD</td>
+            <td class="cifra">300 Mbit/s</td>
+            <td class="cifra"><strong>7,50 €</strong><br><span class="nota-pie">≈ 8 USD</span></td>
+          </tr>
+          <tr class="recomendado">
+            <td>Cloud VPS 8 <span class="nota-pie">— recomendado para producción</span></td>
+            <td class="cifra">8</td>
+            <td class="cifra">24 GB</td>
+            <td class="cifra">300 GB SSD</td>
+            <td class="cifra">600 Mbit/s</td>
+            <td class="cifra"><strong>14,00 €</strong><br><span class="nota-pie">≈ 15 USD</span></td>
+          </tr>
+          <tr>
+            <td>Cloud VPS 12</td>
+            <td class="cifra">12</td>
+            <td class="cifra">48 GB</td>
+            <td class="cifra">400 GB SSD</td>
+            <td class="cifra">800 Mbit/s</td>
+            <td class="cifra"><strong>25,00 €</strong><br><span class="nota-pie">≈ 27 USD</span></td>
+          </tr>
+          <tr>
+            <td>Cloud VPS 16</td>
+            <td class="cifra">16</td>
+            <td class="cifra">64 GB</td>
+            <td class="cifra">500 GB SSD</td>
+            <td class="cifra">1 Gbit/s</td>
+            <td class="cifra"><strong>37,00 €</strong><br><span class="nota-pie">≈ 40 USD</span></td>
+          </tr>
+          <tr>
+            <td>Cloud VPS 18</td>
+            <td class="cifra">18</td>
+            <td class="cifra">96 GB</td>
+            <td class="cifra">600 GB SSD</td>
+            <td class="cifra">1 Gbit/s</td>
+            <td class="cifra"><strong>49,00 €</strong><br><span class="nota-pie">≈ 53 USD</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="nota-pie col">Tarifa mensual efectiva con contrato de 12 meses e impuestos incluidos, tráfico sin límite y sin cuota de instalación en los planes mostrados. Contabo publica en euros; la campaña para Latinoamérica muestra precios en dólares con el plan de entrada desde unos 4,95 USD. <strong>Confirmar la cifra exacta en el carrito antes de contratar</strong>, porque cambia según el plazo, la ubicación del centro de datos y el impuesto aplicado.</p>
+
+    <div class="tabla-envoltorio">
+      <table>
+        <caption>HostGator · VPS NVMe · precios consultados el 30 ago 2026 en hostgator.com</caption>
+        <thead>
+          <tr>
+            <th scope="col">Plan</th>
+            <th scope="col" class="cifra">vCPU</th>
+            <th scope="col" class="cifra">RAM</th>
+            <th scope="col" class="cifra">Disco</th>
+            <th scope="col" class="cifra">Promoción</th>
+            <th scope="col" class="cifra">Renovación</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>NVMe 2 <span class="nota-pie">(Snappy 1000)</span></td>
+            <td class="cifra">1</td>
+            <td class="cifra">2 GB</td>
+            <td class="cifra">50 GB</td>
+            <td class="cifra">2,09 USD</td>
+            <td class="cifra renovacion">4,68 USD</td>
+          </tr>
+          <tr>
+            <td>NVMe 4 <span class="nota-pie">(Snappy 2000)</span></td>
+            <td class="cifra">2</td>
+            <td class="cifra">4 GB</td>
+            <td class="cifra">100 GB</td>
+            <td class="cifra">4,18 USD</td>
+            <td class="cifra renovacion">9,35 USD</td>
+          </tr>
+          <tr>
+            <td>NVMe 8 <span class="nota-pie">(Snappy 4000)</span></td>
+            <td class="cifra">4</td>
+            <td class="cifra">8 GB</td>
+            <td class="cifra">200 GB</td>
+            <td class="cifra">8,36 USD</td>
+            <td class="cifra renovacion">18,70 USD</td>
+          </tr>
+          <tr>
+            <td>NVMe 16 <span class="nota-pie">(Snappy 8000)</span></td>
+            <td class="cifra">8</td>
+            <td class="cifra">16 GB</td>
+            <td class="cifra">450 GB</td>
+            <td class="cifra">17,67 USD</td>
+            <td class="cifra renovacion">39,53 USD</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="nota-pie col">El precio de promoción exige contratar <strong>24 meses por adelantado</strong> y se aplica solo al primer periodo. La cifra que hay que meter en el presupuesto es la de renovación, en rojo.</p>
+
+    <div class="aviso bien">
+      <h4>Veredicto</h4>
+      <p><strong>Contabo para el servidor de la aplicación.</strong> Comparando lo que de verdad se paga a partir del segundo año, el Cloud VPS 8 da 24 GB de memoria por unos 15 USD, mientras que el NVMe 16 de HostGator da 16 GB por 39,53 USD. Para una app que procesa imágenes y corre PostGIS, la memoria es el recurso que se agota primero, y ahí la diferencia es de más de dos a uno.</p>
+    </div>
+
+    <h3>Lo que hay que saber antes de firmar con Contabo</h3>
+    <ul class="marcada col">
+      <li><strong>Las copias de seguridad no vienen incluidas.</strong> El complemento Auto Backup cuesta entre 1,15 € y 12 € al mes según el plan y guarda copias diarias fuera del servidor durante diez días. Contrátalo el mismo día que el VPS.</li>
+      <li><strong>La CPU es compartida y está sobrevendida.</strong> A cambio del precio, el rendimiento por núcleo es menor que en un proveedor de gama alta. Para esta carga de trabajo no es un problema; para un videojuego en tiempo real lo sería.</li>
+      <li><strong>Elige el centro de datos de Estados Unidos</strong> si el público está en Latinoamérica. El de Alemania añade unos 200 ms de latencia en cada petición y se nota al arrastrar el mapa.</li>
+      <li><strong>El soporte responde por ticket, en horario europeo.</strong> No hay teléfono ni chat inmediato. Con un servidor administrado por nosotros no es determinante, pero conviene saberlo antes de una caída.</li>
+    </ul>
+
+    <h3>Entonces, ¿para qué sirve HostGator?</h3>
+    <div class="col">
+      <p>Para el <strong>sitio web público</strong>: la landing, la política de privacidad, los términos y el correo del dominio. Son páginas estáticas que no necesitan el servidor de la app y que conviene tener en otro proveedor, para que sigan en pie precisamente el día que el servidor de la aplicación se caiga —que es el día en que Apple o un usuario van a buscar la política de privacidad—. Su plan compartido más barato basta, y Cloudflare Pages o Netlify hacen lo mismo gratis si se prefiere no pagar nada.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 06 ------------------------------------------------------------------ -->
+<section class="bloque">
+  <div class="lamina">
+    <div class="cabecera-bloque">
+      <div class="num">Lámina 06 — Tiendas</div>
+      <h2>Membresías, herramientas y el macOS de Diego</h2>
+    </div>
+
+    <div class="tabla-envoltorio">
+      <table>
+        <caption>Cuentas de desarrollador · obligatorias para publicar</caption>
+        <thead>
+          <tr>
+            <th scope="col">Plataforma</th>
+            <th scope="col" class="cifra">Coste</th>
+            <th scope="col">Periodicidad</th>
+            <th scope="col">Requisitos</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Apple Developer Program</strong><br><span class="nota-pie">App Store</span></td>
+            <td class="cifra">99 USD</td>
+            <td>Anual, se renueva sola. Si caduca, la app <strong>desaparece</strong> de la tienda.</td>
+            <td>Identidad verificada. Para cuenta de empresa, número D-U-N-S.</td>
+          </tr>
+          <tr>
+            <td><strong>Google Play Console</strong><br><span class="nota-pie">Play Store</span></td>
+            <td class="cifra">25 USD</td>
+            <td>Pago único, de por vida.</td>
+            <td>Identidad verificada. Cuenta personal nueva: prueba cerrada obligatoria.</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>Total para estar en ambas tiendas el primer año</td>
+            <td class="cifra">124 USD</td>
+            <td colspan="2">Después, 99 USD al año</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="aviso riesgo">
+      <h4>La trampa de Google Play que retrasa lanzamientos</h4>
+      <p>Toda cuenta <em>personal</em> creada después del 13 de noviembre de 2023 debe superar una prueba cerrada con <strong>12 testers apuntados de forma continua durante 14 días</strong> antes de poder pedir acceso a producción. Si un tester se sale y vuelve, el contador de sus 14 días empieza de cero.</p>
+      <p>La regla <strong>no se aplica a las cuentas de organización</strong>. Como el proyecto va a ser una sociedad entre dos personas, conviene abrir la cuenta de Google Play como organización desde el principio y ahorrarse el bloqueo. Registrado como <strong>REQ-002</strong>.</p>
+    </div>
+
+    <h3>Individual u organización: decidirlo ahora, no después</h3>
+    <div class="col">
+      <p>En Apple, la cuenta individual publica la app a nombre de una persona física, y ese nombre aparece como vendedor en la ficha de la App Store. Para presentarse ante una marca deportiva, figurar como empresa cambia la conversación. La cuenta de organización exige un número <strong>D-U-N-S</strong>, que es gratuito pero puede tardar entre días y semanas en emitirse, así que hay que pedirlo con antelación.</p>
+      <p>Migrar de individual a organización más tarde es posible pero engorroso: implica transferir la app y volver a pasar verificaciones. Es una decisión barata hoy y cara en seis meses.</p>
+    </div>
+
+    <h3>Herramientas para compilar y subir</h3>
+    <div class="tabla-envoltorio">
+      <table>
+        <caption>Cadena de publicación · qué corre en el macOS de Diego y qué no</caption>
+        <thead>
+          <tr>
+            <th scope="col">Herramienta</th>
+            <th scope="col">Para qué</th>
+            <th scope="col">Dónde corre</th>
+            <th scope="col" class="cifra">Coste</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Xcode</strong></td>
+            <td>Compilar y firmar la app de iOS. Imprescindible tenerlo aunque se compile en la nube, para depurar en un iPhone real.</td>
+            <td>Solo macOS</td>
+            <td class="cifra gratis">Gratis</td>
+          </tr>
+          <tr>
+            <td><strong>Android Studio</strong></td>
+            <td>Compilar la app de Android y depurar en dispositivo.</td>
+            <td>macOS, Windows o Linux</td>
+            <td class="cifra gratis">Gratis</td>
+          </tr>
+          <tr>
+            <td><strong>EAS Build</strong> <span class="nota-pie">(Expo)</span></td>
+            <td>Compila iOS y Android en la nube y gestiona certificados y perfiles. Permite generar la app de iOS <em>sin</em> depender de que el Mac esté disponible.</td>
+            <td>Nube</td>
+            <td class="cifra gratis">Gratis hasta 15 compilaciones de cada plataforma al mes</td>
+          </tr>
+          <tr>
+            <td><strong>EAS Submit</strong></td>
+            <td>Sube el binario a App Store Connect y a Play Console desde la línea de comandos. Evita el paso manual.</td>
+            <td>Nube</td>
+            <td class="cifra gratis">Incluido</td>
+          </tr>
+          <tr>
+            <td><strong>Transporter</strong></td>
+            <td>Alternativa oficial de Apple para subir el binario a mano cuando algo falla en la automatización.</td>
+            <td>Solo macOS</td>
+            <td class="cifra gratis">Gratis</td>
+          </tr>
+          <tr>
+            <td><strong>App Store Connect</strong> y <strong>Play Console</strong></td>
+            <td>Fichas de tienda, capturas, testers, versiones y respuestas a la revisión.</td>
+            <td>Navegador</td>
+            <td class="cifra gratis">Incluido en la membresía</td>
+          </tr>
+          <tr>
+            <td><strong>TestFlight</strong></td>
+            <td>Distribuir betas de iOS al equipo y a probadores externos.</td>
+            <td>Nube</td>
+            <td class="cifra gratis">Incluido</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="aviso bien">
+      <h4>Qué significa esto para el reparto de trabajo</h4>
+      <p>El macOS de Diego cubre el único requisito que no tiene sustituto: <strong>Xcode y Transporter no existen fuera de macOS</strong>. Con EAS Build, sin embargo, el día a día de compilar y publicar se puede hacer desde cualquier sistema operativo, incluido Windows. El Mac deja de ser un cuello de botella y pasa a ser la máquina de depuración y de rescate cuando la automatización falla.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 07 ------------------------------------------------------------------ -->
+<section class="bloque">
+  <div class="lamina">
+    <div class="cabecera-bloque">
+      <div class="num">Lámina 07 — Puntos ciegos</div>
+      <h2>Lo que no estaba en la lista y cuesta caro olvidar</h2>
+    </div>
+    <div class="col">
+      <p>El servidor y las membresías son la parte fácil de presupuestar. Lo que retrasa lanzamientos es casi siempre otra cosa.</p>
+    </div>
+
+    <ol class="marcada col">
+      <li><strong>Contenido generado por usuarios: reportar, bloquear, borrar la cuenta.</strong> Apple exige, para toda app que publique contenido de usuarios, un filtro previo, un botón de reporte con respuesta en 24 horas, la posibilidad de bloquear a un autor, contacto publicado, y el borrado de cuenta desde dentro de la app. Faltar a cualquiera de los cinco es rechazo. Son funciones de producto, no una casilla que se marca al final. → <strong>REQ-001</strong>.</li>
+
+      <li><strong>Coste variable del mapa.</strong> Las teselas se pagan por uso y es el único gasto que crece con el éxito. Mapbox no cobra hasta 25.000 usuarios móviles activos al mes; Google Maps reestructuró su tarifa en 2026 y sale bastante más caro. Con teselas propias el coste es cero pero hay que mantener el servicio. Conviene decidirlo pronto y poner una alerta al 70% del tramo gratuito.</li>
+
+      <li><strong>Licencia de las fotos.</strong> Quien sube una foto conserva sus derechos salvo que las condiciones digan otra cosa. Sin una licencia explícita de uso, urbanFlow <em>no puede</em> ceder esas imágenes a una marca, que es justo lo que se quiere vender. → <strong>REQ-004</strong>.</li>
+
+      <li><strong>Política de privacidad y términos, publicados en una URL estable.</strong> Ambas tiendas los exigen antes de la primera revisión, y Apple pide además el detalle de qué datos se recogen. Hace falta el dominio, el sitio y los textos revisados.</li>
+
+      <li><strong>Ubicación y datos personales.</strong> La posición del dispositivo es un dato personal. Hay que pedir el permiso en contexto, con un texto que explique el beneficio, no pedir nunca el permiso permanente, y no guardar la ubicación del usuario en la base de datos. La coordenada del spot sí es pública; la de la persona, no. → <strong>REQ-011</strong>.</li>
+
+      <li><strong>Responsabilidad sobre el uso de los spots.</strong> Un bowl abandonado o un muro en propiedad privada implican riesgo físico y legal. Hace falta un campo obligatorio de tipo de acceso, un descargo aceptado al registrarse y una regla de moderación clara sobre qué no se publica. → <strong>REQ-012</strong>.</li>
+
+      <li><strong>Copias de seguridad probadas.</strong> Una copia que nunca se ha restaurado no es una copia. Hay que restaurarla en un servidor limpio una vez, antes de necesitarla de verdad.</li>
+
+      <li><strong>Dominio y correo.</strong> Unos 12 USD al año el dominio, más un buzón para el contacto de soporte que las tiendas obligan a publicar. Una cuenta de Gmail personal en la ficha de la App Store resta credibilidad justo delante de la marca a la que se le quiere vender.</li>
+
+      <li><strong>Errores y disponibilidad.</strong> Sentry en su plan gratuito y un monitor externo que avise cuando la API deje de responder. Sin esto, el primer aviso de una caída llega por una reseña de una estrella.</li>
+
+      <li><strong>El mapa vacío del día uno.</strong> Nadie vuelve a una app que no tiene nada. Antes de abrir hay que sembrar a mano entre 50 y 100 spots verificados de <em>una sola</em> ciudad. Es trabajo de campo, no de programación, y hay que planificarlo como tal.</li>
+
+      <li><strong>Quién cubre las 24 horas de moderación.</strong> Es un compromiso operativo con nombre y apellido, fines de semana incluidos. Sin turnos acordados, la promesa que se le hace a Apple se incumple sola.</li>
+
+      <li><strong>El acuerdo entre socios.</strong> Quién es dueño de qué, qué pasa con el código y con la marca si uno se retira, y cómo se reparte lo que entre por un patrocinio. Es incómodo de hablar hoy y muy caro de resolver después.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- 08 ------------------------------------------------------------------ -->
+<section class="bloque">
+  <div class="lamina">
+    <div class="cabecera-bloque">
+      <div class="num">Lámina 08 — Presupuesto</div>
+      <h2>Lo que cuesta tener esto en pie</h2>
+    </div>
+
+    <div class="tabla-envoltorio">
+      <table>
+        <caption>Gasto recurrente mensual · fase de validación</caption>
+        <thead>
+          <tr>
+            <th scope="col">Concepto</th>
+            <th scope="col">Proveedor</th>
+            <th scope="col" class="cifra">USD / mes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>VPS de producción · 8 vCPU, 24 GB</td>
+            <td>Contabo Cloud VPS 8</td>
+            <td class="cifra">15</td>
+          </tr>
+          <tr>
+            <td>Copias de seguridad automáticas</td>
+            <td>Contabo Auto Backup</td>
+            <td class="cifra">2 – 13</td>
+          </tr>
+          <tr>
+            <td>Almacenamiento de fotos · 250 GB</td>
+            <td>Contabo Object Storage</td>
+            <td class="cifra">3</td>
+          </tr>
+          <tr>
+            <td>CDN, DNS y protección</td>
+            <td>Cloudflare · plan gratuito</td>
+            <td class="cifra gratis">0</td>
+          </tr>
+          <tr>
+            <td>Teselas del mapa</td>
+            <td>Mapbox · hasta 25.000 usuarios/mes</td>
+            <td class="cifra gratis">0</td>
+          </tr>
+          <tr>
+            <td>Compilaciones móviles</td>
+            <td>EAS · 15 + 15 al mes</td>
+            <td class="cifra gratis">0</td>
+          </tr>
+          <tr>
+            <td>Notificaciones push</td>
+            <td>Firebase Cloud Messaging + APNs</td>
+            <td class="cifra gratis">0</td>
+          </tr>
+          <tr>
+            <td>Seguimiento de errores</td>
+            <td>Sentry · plan gratuito</td>
+            <td class="cifra gratis">0</td>
+          </tr>
+          <tr>
+            <td>Correo transaccional</td>
+            <td>Resend · plan gratuito</td>
+            <td class="cifra gratis">0</td>
+          </tr>
+          <tr>
+            <td>Sitio público y legales</td>
+            <td>Cloudflare Pages, o compartido en HostGator</td>
+            <td class="cifra">0 – 5</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2">Total mensual</td>
+            <td class="cifra">20 – 36 USD</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="tabla-envoltorio">
+      <table>
+        <caption>Gasto anual y pagos únicos</caption>
+        <thead>
+          <tr>
+            <th scope="col">Concepto</th>
+            <th scope="col">Frecuencia</th>
+            <th scope="col" class="cifra">USD</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Apple Developer Program</td>
+            <td>Anual</td>
+            <td class="cifra">99</td>
+          </tr>
+          <tr>
+            <td>Google Play Console</td>
+            <td>Pago único</td>
+            <td class="cifra">25</td>
+          </tr>
+          <tr>
+            <td>Dominio .com</td>
+            <td>Anual</td>
+            <td class="cifra">12</td>
+          </tr>
+          <tr>
+            <td>Número D-U-N-S <span class="nota-pie">(si se abre cuenta de empresa)</span></td>
+            <td>Único</td>
+            <td class="cifra gratis">0</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2">Primer año</td>
+            <td class="cifra">136 USD</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="aviso">
+      <h4>La cifra que importa</h4>
+      <p>Tener urbanFlow funcionando y publicado en las dos tiendas cuesta del orden de <strong>380 a 570 USD el primer año</strong> en infraestructura y licencias. El coste real del proyecto es el tiempo de las dos personas que lo construyen y el trabajo continuo de moderación —y ese sí conviene ponerle número antes de comprometerse con una marca.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<section class="cierre">
+  <div class="lamina">
+    <div class="cabecera-bloque">
+      <div class="num">Lámina 09 — Siguientes pasos</div>
+      <h2>Por dónde se empieza</h2>
+    </div>
+    <div class="col">
+      <ol class="marcada">
+        <li><strong>Incorporar la maqueta de Diego</strong> al repositorio. Bloquea los colores, la tipografía y los componentes del frontend, que hoy están con valores provisionales.</li>
+        <li><strong>Decidir el tipo de cuenta en las tiendas</strong> y, si es de empresa, pedir el D-U-N-S de inmediato: es lo que más tarda y no depende de nosotros.</li>
+        <li><strong>Registrar el dominio</strong> y publicar la política de privacidad y los términos, con la licencia de las fotos incluida desde la primera versión.</li>
+        <li><strong>Contratar el VPS</strong> con el complemento de copias de seguridad y levantar el entorno con Docker.</li>
+        <li><strong>Construir de punta a punta el circuito mínimo</strong>: subir un spot, moderarlo, verlo en el mapa. Nada más hasta que eso funcione.</li>
+        <li><strong>Sembrar la primera ciudad</strong> con 50 a 100 spots verificados a mano, antes de enseñárselo a nadie.</li>
+      </ol>
+      <p style="margin-top:28px">El seguimiento de cada punto vive en <strong>docs/</strong>, con una ficha por requerimiento y la bitácora del proyecto en <strong>urbanflow.md</strong>.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="pie">
+  <div class="lamina">
+    <p>Dossier interno de urbanFlow · versión 1.0 · 30 de agosto de 2026. Documento de trabajo, no es material publicitario ni una oferta comercial. Las marcas mencionadas por categoría son prospectos potenciales; no existe relación, acuerdo ni patrocinio con ninguna de ellas.</p>
+
+    <h4>Precios consultados el 30 ago 2026</h4>
+    <ul>
+      <li><a href="https://contabo.com/es/vps/">Contabo · Cloud VPS</a></li>
+      <li><a href="https://www.hostgator.com/vps-hosting">HostGator · VPS Hosting</a></li>
+      <li><a href="https://developer.apple.com/programs/">Apple Developer Program</a></li>
+      <li><a href="https://support.google.com/googleplay/android-developer/answer/6112435">Google Play Console · registro</a></li>
+      <li><a href="https://support.google.com/googleplay/android-developer/answer/14151465">Google Play · requisito de prueba cerrada</a></li>
+      <li><a href="https://developer.apple.com/app-store/review/guidelines/">App Store Review Guidelines · sección 1.2</a></li>
+      <li><a href="https://docs.expo.dev/billing/plans/">Expo · planes y complementos</a></li>
+    </ul>
+
+    <p class="nota-pie">Los precios de proveedores cambian sin aviso y varían según el plazo, el país y los impuestos aplicados. Verifica cada cifra en el carrito antes de contratar.</p>
+  </div>
+</footer>
