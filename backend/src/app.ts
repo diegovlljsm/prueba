@@ -5,6 +5,7 @@ import { pool } from "./db.js";
 import { asyncHandler } from "./http.js";
 import { eventsRouter } from "./routes/events.js";
 import { spotsRouter } from "./routes/spots.js";
+import { usuariosRouter } from "./routes/usuarios.js";
 import { videosRouter } from "./routes/videos.js";
 
 export function crearApp() {
@@ -55,6 +56,7 @@ export function crearApp() {
   app.use("/api", spotsRouter);
   app.use("/api", eventsRouter);
   app.use("/api", videosRouter);
+  app.use("/api", usuariosRouter);
 
   app.use("/api", (_req, res) => {
     res.status(404).json({ error: "Ruta no encontrada" });

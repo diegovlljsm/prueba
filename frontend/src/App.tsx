@@ -45,7 +45,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from './lib/utils';
-import { auth, db, storage } from './firebase';
+import { auth, storage } from './firebase';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { Spot, VideoClip, UrbanEvent } from './types';
 import { CATEGORIES, COMMUNITY_POSTS, STORIES, MAP_STYLES } from './constants';

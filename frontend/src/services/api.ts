@@ -16,7 +16,28 @@ async function authHeaders(): Promise<HeadersInit> {
   return { Authorization: `Bearer ${token}` };
 }
 
+export interface UsuarioActual {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  role: 'user' | 'admin';
+}
+
 export const api = {
+  /**
+   * Quién es el usuario según el servidor, incluido su rol.
+   *
+   * El rol vive en la tabla `users` de Postgres, no en el cliente: es el mismo
+   * dato que el servidor comprueba antes de dejar pasar una ruta de
+   * administración. Aquí solo sirve para mostrar u ocultar la pestaña de
+   * moderación.
+   */
+  async fetchMe(): Promise<UsuarioActual> {
+    const res = await fetch('/api/me', { headers: await authHeaders() });
+    if (!res.ok) throw new Error('No se pudo obtener el usuario actual');
+    return res.json();
+  },
+
   async fetchSpots(): Promise<Spot[]> {
     const res = await fetch('/api/spots');
     return res.json();

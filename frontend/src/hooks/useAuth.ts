@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { auth, googleProvider, db } from '../firebase';
+import { auth, googleProvider } from '../firebase';
 import {
   signInWithPopup,
   signInWithRedirect,
@@ -8,7 +8,7 @@ import {
   signOut,
   User as FirebaseUser,
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { api } from '../services/api';
 
 /**
  * Traduce el código de error de Firebase a algo que una persona pueda leer y
@@ -53,24 +53,19 @@ export function useAuth() {
         setUser(firebaseUser);
         setIsGuest(false);
 
-        // Check/Create user profile in Firestore
-        const userRef = doc(db, 'users', firebaseUser.uid);
-        const userSnap = await getDoc(userRef);
-
-        if (!userSnap.exists()) {
-          await setDoc(userRef, {
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            displayName: firebaseUser.displayName,
-            photoURL: firebaseUser.photoURL,
-            role: 'user',
-            createdAt: serverTimestamp()
-          });
-        } else {
-          const userData = userSnap.data();
-          if (userData.role === 'admin') {
-            setIsAdmin(true);
-          }
+        // El perfil y el rol los resuelve nuestra API, no Firestore: el
+        // servidor crea el usuario en Postgres en su primera petición y
+        // devuelve el rol con el que después autoriza. Tener dos sitios donde
+        // vive el rol es tener dos que se pueden contradecir.
+        try {
+          const perfil = await api.fetchMe();
+          setIsAdmin(perfil.role === 'admin');
+        } catch (error) {
+          // Que la API no responda no debe dejar a la persona fuera de la app:
+          // puede seguir mirando el mapa. Simplemente no verá moderación, que
+          // es exactamente lo que el servidor haría de todos modos.
+          console.error('[auth] no se pudo leer el perfil desde la API:', error);
+          setIsAdmin(false);
         }
       } else {
         setUser(null);
