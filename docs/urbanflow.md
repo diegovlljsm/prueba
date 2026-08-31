@@ -6,6 +6,29 @@ tomada.
 
 - **Última actualización:** 2026-08-30
 - **Índice de fichas:** [docs/README.md](./README.md)
+- **Repositorio:** https://github.com/diegovlljsm/prueba
+
+### Flujo de ramas
+
+| Rama | Para qué | Regla |
+|---|---|---|
+| `dev` | Trabajo diario. Todo commit va aquí primero | Puede romperse; se arregla en el momento |
+| `main` | Estado estable, lo que se despliega | Solo recibe cambios desde `dev`, y solo cuando el entorno local corre entero |
+
+Nada se commitea directamente sobre `main`. Cuando `dev` está sano, se
+promueve con un pull request desde `dev` hacia `main` —así queda registrado
+qué entró y cuándo— o, mientras seamos dos, con un merge directo:
+
+```bash
+git checkout main
+git merge --no-ff dev
+git push origin main
+git checkout dev
+```
+
+El `--no-ff` es a propósito: deja un commit de fusión que marca en el
+historial dónde estuvo cada estado estable. Con avance rápido esa frontera se
+pierde y `main` deja de contar nada.
 
 ---
 
@@ -164,3 +187,12 @@ Entradas nuevas al final. Formato:
 - **2026-08-30** — Frontend conectado por el proxy de Vite. Dos cambios en el
   código de Diego: el script `dev` pasa a `vite` (el anterior queda como
   `dev:firebase`) y `vite.config.ts` redirige `/api` al contenedor.
+- **2026-08-30** — Repositorio publicado en
+  `https://github.com/diegovlljsm/prueba.git` (estaba vacío, no se pisó nada).
+  Commit inicial con 63 archivos: frontend de Diego, backend, entorno Docker,
+  documentación y herramientas. Verificado antes de subir que no entraran
+  `node_modules`, ficheros `.env` reales ni claves de servicio.
+- **2026-08-30** — Definido el flujo de ramas: `dev` para el trabajo diario,
+  `main` solo para estado estable. Ambas quedan en el mismo commit de partida.
+  Añadido `.gitattributes` para normalizar los saltos de línea entre el Windows
+  de Alfredo y el macOS de Diego.
