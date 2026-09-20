@@ -4,6 +4,7 @@ Toda petición de ejecución empieza aquí. Si algo no tiene ficha, no se
 implementa; si se implementa algo, su ficha se actualiza el mismo día.
 
 - **Bitácora del proyecto:** [urbanflow.md](./urbanflow.md)
+- **Puesta en marcha (guía operativa):** [guias/puesta-en-marcha.md](./guias/puesta-en-marcha.md)
 - **Dossier para marcas e infraestructura:** [propuesta-marcas.html](./propuesta-marcas.html)
 - **Cómo se crean las fichas:** las genera el agente `urbanflow-planner`
   (`.claude/agents/urbanflow-planner.md`). Invócalo con el agente en lugar de
@@ -16,6 +17,7 @@ implementa; si se implementa algo, su ficha se actualiza el mismo día.
 | `FEAT` | Capacidad de producto de cara al usuario o al moderador | `features/` |
 | `REQ` | Requerimiento técnico, de infraestructura, legal o de tiendas | `requerimientos/` |
 | `ADR` | Decisión de arquitectura con alternativas descartadas | `decisiones/` |
+| — | Guías operativas: cómo ejecutar algo paso a paso | `guias/` |
 
 **Estados:** `propuesto` → `aprobado` → `en-curso` → `hecho`.
 Fuera del carril: `bloqueado`, `cancelado`.
@@ -57,6 +59,7 @@ Los IDs no se reciclan nunca, ni siquiera si la ficha se cancela.
 | REQ-010 | Límites de tasa y protección contra abuso | infra | P1 | propuesto | ficha pendiente |
 | REQ-011 | Consentimiento y tratamiento de datos personales | legal | P0 | propuesto | ficha pendiente |
 | REQ-012 | Descargo de responsabilidad por uso de los spots | legal | P1 | propuesto | ficha pendiente |
+| REQ-013 | Entorno de demostración en red local y réplica para el socio | infra | P0 | en-curso | [ver](./requerimientos/REQ-013-entorno-demo-red-local.md) |
 
 ## Decisiones de arquitectura
 

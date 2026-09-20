@@ -4,7 +4,7 @@ Documento vivo. Todo lo que se decide, se descarta o queda pendiente en
 urbanFlow se registra aquí. Si una decisión no está en esta bitácora, no está
 tomada.
 
-- **Última actualización:** 2026-08-30
+- **Última actualización:** 2026-09-20
 - **Índice de fichas:** [docs/README.md](./README.md)
 - **Repositorio:** https://github.com/diegovlljsm/prueba
 
@@ -250,3 +250,126 @@ Entradas nuevas al final. Formato:
   leía `clientX` de un evento que puede ser táctil o de teclado, con lo que en
   un dispositivo táctil saltaba a la esquina de la pantalla. Los tres
   corregidos.
+- **2026-09-19** — [REQ-013] Planificado el despliegue del entorno de
+  demostración: operativa local, acceso desde el celular, HTTPS y réplica en la
+  red de Diego. Cinco fases, cada una con su comprobación. Ficha en
+  `docs/requerimientos/REQ-013-entorno-demo-red-local.md`.
+- **2026-09-19** — Escrita la guía operativa
+  `docs/guias/puesta-en-marcha.md`: el paso a paso reproducible para levantar
+  urbanFlow en un equipo nuevo, con columnas para Windows y macOS, tabla de
+  diagnóstico por síntoma y referencia de comandos. Es el documento que se le
+  entrega a Diego. Nueva carpeta `docs/guias/` en el índice.
+- **2026-09-19** — Auditado por qué nadie ha visto todavía la app entera: no
+  falta código, faltan credenciales de consola. `frontend/.env.local` tiene la
+  configuración de Firebase a medias —`AUTH_DOMAIN`, `PROJECT_ID` y
+  `STORAGE_BUCKET` de `urbanflow-a0b95`, pero `API_KEY`, `MESSAGING_SENDER_ID`
+  y `APP_ID` vacías— y `VITE_GOOGLE_MAPS_API_KEY` está vacía, así que el mapa
+  se sustituye por un aviso.
+- **2026-09-19** — Identificado el fallo silencioso de
+  `firebase-applet-config.json`: al ser la reserva de cada variable ausente, una
+  configuración incompleta no produce error, produce una conexión híbrida entre
+  el proyecto nuevo y el viejo de AI Studio. Propuesto sustituir esa reserva por
+  un fallo explícito en el arranque; mientras exista, `.env.local` se rellena
+  entero o no se rellena.
+- **2026-09-19** — Documentada la restricción que condiciona todo el acceso
+  móvil: los navegadores solo entregan `navigator.geolocation` en contexto
+  seguro. `http://localhost` lo es por excepción de la especificación;
+  `http://192.168.1.105` no. Por eso ver la app por IP en la red local dibuja
+  el mapa pero deja el GPS y el acceso con Google inoperativos.
+- **2026-09-19** — Elegido **Tailscale** para resolver ese punto:
+  `tailscale serve` da un nombre `*.ts.net` estable con certificado real, sin
+  abrir puertos en el router, y ese nombre sí se puede registrar como dominio
+  autorizado en Firebase y como referente de la clave de Maps. Ya estaba
+  instalado en el equipo de Alfredo, así que no añade herramienta nueva.
+  Descartado `tailscale funnel` mientras `AUTH_MODE=dev`: ese modo no verifica
+  la firma del token y publicarlo en internet regalaría el rol de administrador.
+- **2026-09-19** — Anotada una trampa de Vite 6 para la fase de HTTPS: bloquea
+  las peticiones cuyo `Host` no reconoce, de modo que el acceso por el nombre
+  `*.ts.net` devuelve "Blocked request" hasta declarar
+  `server.allowedHosts: ['.ts.net']` en `vite.config.ts`.
+- **2026-09-20** — [REQ-013] Completada la Fase 0. Alfredo hizo los trámites de
+  consola que faltaban desde agosto: app web creada en `urbanflow-a0b95`,
+  Google habilitado como proveedor de acceso, cuenta de facturación activa,
+  **Maps JavaScript API** y **Directions API** habilitadas, y una clave de API
+  restringida por sitio web a `http://localhost:5173/*` y limitada a esas dos
+  APIs. La ficha pasa a `en-curso`.
+- **2026-09-20** — Rellenadas las siete variables de `frontend/.env.local` con
+  la configuración real del proyecto. Se dejó fuera `measurementId`
+  deliberadamente: es de Google Analytics y `src/firebase.ts` no inicializa
+  Analytics, así que solo ocuparía sitio. Verificado que git lo ignora.
+- **2026-09-20** — Verificado el arranque de punta a punta: contenedores sanos,
+  `/api/health` con PostGIS 3.4, los tres spots y los tres eventos de ejemplo
+  sirviéndose, Vite v6.4.3 en `:5173`, el proxy `/api` devolviendo 200 y la
+  configuración de Firebase resolviendo a `urbanflow-a0b95`. Confirmado que ya
+  **no queda ningún rastro del proyecto viejo** `project-5edc560e` en lo que
+  sirve el navegador: la trampa del `firebase-applet-config.json` está
+  neutralizada por tener las seis variables rellenas.
+- **2026-09-20** — Se usan **dos claves distintas** del mismo proyecto, y
+  conviene no confundirlas: la `Browser key (auto created by Firebase)` es la
+  de `VITE_FIREBASE_API_KEY`, y la `Clave de API 2`, creada a mano y restringida
+  a Maps + Directions, es la de `VITE_GOOGLE_MAPS_API_KEY`. Cada origen nuevo
+  —IP de la red local, nombre `*.ts.net`— hay que añadirlo a las restricciones
+  de la segunda **y** a los dominios autorizados de Firebase Auth.
+- **2026-09-20** — Primer inicio de sesión real con Google, correcto. El listado
+  de spots carga con sus distancias. El mapa, en cambio, quedó en negro: era el
+  propio contenedor (`.google-map-dark` fuerza `#020617`), no un hueco vacío, de
+  modo que el componente se montaba pero no llegaban las teselas.
+- **2026-09-20** — Causa del mapa en negro: `ApiTargetBlockedMapError`. No era
+  el referente —esa restricción estaba bien guardada— sino la restricción **de
+  API** de la clave, que no incluía la Maps JavaScript API. El selector de
+  Google ofrece varias APIs de nombre casi idéntico y el error no dice cuál
+  falta. Añadido a la tabla de diagnóstico de la guía.
+- **2026-09-20** — Anotada deuda técnica con reloj en marcha: la consola avisa
+  de que `google.maps.Marker` está obsoleto desde 2024-02-21 en favor de
+  `AdvancedMarkerElement`, y `DirectionsService` y `DirectionsRenderer` desde
+  2026-02-25 en favor de `routes.Route.computeRoutes`. Nada deja de funcionar
+  hoy y Google promete 12 meses de preaviso, pero afecta a `App.tsx` y a
+  `useRuta`. Pendiente de ficha propia; no se toca mientras el entorno no esté
+  verificado de punta a punta.
+- **2026-09-20** — **Fase 0 cerrada: la app corre entera por primera vez.**
+  Mapa de Google con el tema oscuro de la maqueta, marcadores de los spots
+  sobre Santiago, sesión iniciada con Google y listados con distancias. Tres de
+  los siete criterios de REQ-013 quedan verificados.
+- **2026-09-20** — Lo que costó una hora fue una confusión de la consola de
+  Google, no un fallo del código: la pantalla de la clave tiene **dos bloques
+  de restricciones con nombres casi idénticos** —"Restricciones de API" (qué
+  APIs puede llamar) y "Restricciones de aplicaciones" (desde dónde se puede
+  usar)—. La clave había quedado restringida a `Address Validation API` y
+  `BigQuery Connection API`, las dos primeras del desplegable en orden
+  alfabético, y los intentos de arreglo fueron a parar al bloque equivocado.
+- **2026-09-20** — Método que resolvió el diagnóstico, por si vuelve a pasar:
+  Google distingue `ApiNotActivatedMapError` (la API no está habilitada en el
+  proyecto) de `ApiTargetBlockedMapError` (sí lo está, pero la clave no puede
+  llamarla). Ver el segundo descartó de un plumazo toda la rama de "habilitar
+  la API" y dejó el problema acotado a la lista de la clave. Además, una
+  llamada a la Directions API desde el servidor devolvió "API keys with referer
+  restrictions cannot be used with this API", lo que confirmó que la
+  restricción por sitio web seguía en pie y que el bloqueo era de otra cosa.
+- **2026-09-20** — Registrado el aviso pendiente: la clave quedó
+  temporalmente en "No restringir clave" para aislar la causa. Hay que volver a
+  restringirla a **Maps JavaScript API** y **Directions API**; viaja en el
+  bundle del navegador y el proyecto tiene tarjeta asociada.
+- **2026-09-20** — [REQ-013] **Fase 3 cerrada: la app se ve desde el celular.**
+  Vite escuchando en `0.0.0.0` con `--host`, regla de firewall para el puerto
+  5173 en perfil privado, y el origen de la red local añadido a
+  `CORS_ORIGINS`. Verificado desde un iPhone en Safari contra
+  `http://192.168.1.105:5173`, entrando como invitado. Cuatro de los siete
+  criterios de la ficha quedan cumplidos.
+- **2026-09-20** — Confirmados en el celular los dos límites que ya estaban
+  previstos: el acceso con Google avisa de dominio no autorizado —Firebase no
+  admite direcciones IP como dominio— y la ubicación real no se entrega, porque
+  HTTP no es contexto seguro. Ambos se resuelven de una vez en la Fase 4.
+- **2026-09-20** — El aviso de dominio no autorizado apareció **en pantalla y
+  con texto accionable**, no en la consola. Es el refuerzo de `useAuth` que se
+  hizo el 30 de agosto funcionando como se diseñó: el error dejó de tragarse
+  con un `console.error`.
+- **2026-09-20** — Reescrita por completo
+  `docs/guias/puesta-en-marcha.md` a nivel junior, a petición de Alfredo, para
+  poder repetir el proceso con Diego. Añadidos: explicación de la arquitectura
+  en cuatro piezas, cinco conceptos mínimos en secciones plegables
+  (contenedor, puerto, variable de entorno, clave de API, contexto seguro), el
+  porqué de cada comando, una sección de trabajo diario con el flujo de ramas
+  y el ciclo de commits, y una tabla de diagnóstico con las catorce trampas
+  reales encontradas —entre ellas los dos bloques de restricciones de Google,
+  la diferencia entre `ApiNotActivatedMapError` y `ApiTargetBlockedMapError`, y
+  que PowerShell y CMD no comparten comandos—.
