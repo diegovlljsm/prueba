@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  /* Condensed display face for category filter tabs (Spots/Eventos) - see
+     the <link> to Google Fonts in index.html. Loaded at a single heavy
+     weight, already tight/compact, so it needs little extra tracking. */
+  --font-display: "Anton", "Arial Narrow", sans-serif;
+  --color-emerald-50: #f7fee7;
+  --color-emerald-100: #ecfccb;
+  --color-emerald-200: #d9f99d;
+  --color-emerald-300: #bef264;
+  --color-emerald-400: #a3e635;
+  --color-emerald-500: #a3ff12;
+  --color-emerald-600: #65a30d;
+  --color-emerald-700: #4d7c0f;
+  --color-emerald-800: #3f6212;
+  --color-emerald-900: #365314;
+  --color-emerald-950: #1a2e05;
+}
+
+:root {
+  --bg: #0f172a;
+  --card: #1e293b;
+  --accent: #a3ff12;
+}
+
+body {
+  background-color: var(--bg);
+  color: #f8fafc;
+}
+
+/* ---------------------------------------------------------------------
+   Light theme ("Tema Claro"). Dark stays the app's untouched default -
+   every existing class keeps working as-is. Light mode is layered on
+   top with a custom `light:` variant (same mechanism as Tailwind's own
+   `dark:`), scoped to [data-theme="light"], which the "Tema" toggle in
+   Configuración sets on that layout's root element. So JSX keeps its
+   normal dark-mode classes and additionally gets `light:bg-white` etc.
+   next to them - additive, nothing to break. Accent goes from neon green
+   (#a3ff12) to muted sage green (#96ab79), same corner radius as dark mode
+   in both themes (nothing sets `light:rounded-*`), just solid black
+   borders/backgrounds/text instead of the dark theme's blurred-glass
+   panels - `light:border-black` shows up a lot.
+   ------------------------------------------------------------------- */
+@custom-variant light (&:where([data-theme="light"], [data-theme="light"] *));
+
+.map-container {
+  width: 100%;
+  height: 100%;
+}
+
+.google-map-dark {
+  background-color: #020617 !important;
+}
+
+.google-map-dark img {
+  filter: grayscale(0.1) brightness(0.9);
+}
+
+.google-map-light {
+  background-color: #f3f1ec !important;
+}
+
+/* Custom InfoWindow styling for dark theme 
+.gm-style-iw-c {
+  background-color: #0f172a !important;
+  padding: 0 !important;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5) !important;
+  z-index: 1000 !important;
+  min-width: 220px !important;
+}
+
+.gm-style-iw-d {
+  overflow: hidden !important;
+  max-height: none !important;
+  padding: 0 !important;
+}
+
+.gm-style-iw-tc::after {
+  background-color: #0f172a !important;
+}
+
+.gm-ui-hover-effect {
+  display: none !important;
+}
+*/
+

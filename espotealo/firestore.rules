@@ -1,0 +1,130 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId}
+    // Fields:
+    //   - uid: string (required)
+    //   - email: string (required, email format)
+    //   - displayName: string (optional)
+    //   - photoURL: string (optional) - http(s) URL, data: URL, or a
+    //     preset avatar path under /avatars (see AVATAR_OPTIONS)
+    //   - bannerURL: string (optional) - same shape as photoURL but for
+    //     preset paths under /banners (see BANNER_OPTIONS)
+    //   - instagram: string (optional) - just the handle (no leading @),
+    //     not a real OAuth connection; the UI links to instagram.com/<handle>
+    //   - role: string (required, ['user', 'admin'])
+    //   - city, discipline, bio: string (optional) - profile fields from
+    //     EditProfileForm.tsx
+    //   - favorites: array of spot ids (optional) - see SpotDetail.tsx's
+    //     favorite toggle
+    //   - createdAt: timestamp (optional)
+    //
+    // Challenges/XP are NOT stored on this doc - GET /api/users/me/challenges
+    // in server.ts computes them fresh on every request by counting this
+    // user's real spots/photos/reviews/visits (createdBy == uid), so
+    // there's nothing here that could drift out of sync.
+    //
+    // Collection: visits
+    // Document ID: {visitId} (auto-generated)
+    // Fields:
+    //   - spot_id: string (reference to spots/{spotId})
+    //   - createdBy: string (uid of the visitor)
+    //   - createdAt: timestamp
+    // At most one doc per (createdBy, spot_id) pair - see POST
+    // /api/spots/:id/visit, which only writes a doc once the caller's
+    // reported GPS coordinates are within VISIT_RADIUS_METERS of the
+    // spot's own lat/lng.
+    //
+    // Collection: spots
+    // Document ID: {spotId} (auto-generated)
+    // Fields:
+    //   - name, description, category, marker_color: string
+    //   - lat, lng: number
+    //   - show_label: boolean
+    //   - image_url, location_name, floor_quality, obstacles: string (optional)
+    //   - createdBy: string (uid of creator)
+    //   - createdAt: timestamp
+    //
+    // Collection: events
+    // Document ID: {eventId} (auto-generated)
+    // Fields:
+    //   - title, description, date, location_name, category: string
+    //   - lat, lng: number
+    //   - createdAt: timestamp
+    //
+    // Collection: videos
+    // Document ID: {videoId} (auto-generated)
+    // Fields:
+    //   - spot_id: string (reference to spots/{spotId})
+    //   - video_url, user_name: string
+    //   - status: string (['pending', 'approved', 'rejected'])
+    //   - createdBy: string (uid of uploader)
+    //   - createdAt: timestamp
+    //
+    // NOTE: All writes to spots/events/videos in this app currently go
+    // through the Express API (server.ts), which uses the Admin SDK and
+    // therefore bypasses these rules entirely. These rules exist as
+    // defense-in-depth in case a client ever reads/writes these
+    // collections directly (e.g. a future real-time listener), and as
+    // living documentation of the intended data model.
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email', 'role']) &&
+             data.uid == request.auth.uid &&
+             isValidEmail(data.email) &&
+             data.role in ['user', 'admin'];
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data) && (request.resource.data.role == 'user' || isAdmin());
+      allow update: if isOwner(userId) && isValidUser(request.resource.data) && (request.resource.data.role == resource.data.role || isAdmin());
+    }
+
+    match /spots/{spotId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    match /events/{eventId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /videos/{videoId} {
+      // Only approved videos are publicly visible; pending/rejected ones
+      // are only visible to admins (matches what the API already exposes).
+      allow read: if resource.data.status == 'approved' || isAdmin();
+      allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid
+                    && request.resource.data.status == 'pending';
+      allow update, delete: if isAdmin();
+    }
+  }
+}

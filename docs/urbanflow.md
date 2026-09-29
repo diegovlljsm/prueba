@@ -373,3 +373,62 @@ Entradas nuevas al final. Formato:
   reales encontradas —entre ellas los dos bloques de restricciones de Google,
   la diferencia entre `ApiNotActivatedMapError` y `ApiTargetBlockedMapError`, y
   que PowerShell y CMD no comparten comandos—.
+
+## 9. Análisis de `espotealo` (2026-09-29)
+
+Diego entregó una refactorización completa en `espotealo/`, hecha con Claude.
+Levantada en local y analizada. Es una app bastante más madura que la que
+teníamos en `frontend/`.
+
+**Lo que trae**
+
+| | `frontend/` (lo que había) | `espotealo/` (lo nuevo) |
+|---|---|---|
+| Líneas de frontend | 2.256 | 9.655 |
+| Layouts | uno solo | móvil y escritorio separados a propósito |
+| Tema | oscuro | claro |
+| Endpoints | 12 | 41 |
+| Claves de mapa | ninguna | Google Maps y OpenRouteService, funcionando |
+| Contenido | 5 spots de prueba | 10+ spots reales con foto y eventos chilenos |
+| Rutas | Google Directions | OpenRouteService |
+
+Pantallas que no teníamos: comunidad con publicaciones y comentarios, feed de
+actividad, notificaciones, favoritos, desafíos, edición de perfil, asistencia a
+eventos, reseñas y fotos tanto de spots como de eventos, onboarding.
+
+**Hallazgos que importan**
+
+1. **No persiste nada.** Sin credenciales de Firebase Admin, `server.ts` cae a
+   un array en memoria. Los diez spots reaparecen al reiniciar porque están
+   escritos en el código, pero todo lo que cree un usuario se pierde.
+2. **OpenRouteService en vez de Google Directions.** Decisión deliberada y
+   mejor que la mía: Directions exige billing habilitado, ORS es gratis y sin
+   tarjeta. La clave ya está puesta y funciona.
+3. **Un solo proceso.** `npm run dev` levanta API y Vite juntos en el 3000,
+   con Express haciendo de middleware de Vite.
+4. **Incompatibilidad de formato en `category`.** espotealo guarda `"skate"`
+   como cadena suelta; nuestro backend espera un array JSON serializado
+   (`'["skate"]'`). Hay que unificar antes de conectar nada.
+5. **Campos nuevos en Spot** que nuestra tabla no tiene: `open_hours`,
+   `spot_type`, `features[]`, `difficulty`, `rating`, `review_count`.
+6. Mucho está marcado como MOCK en el propio código: perfil, desafíos,
+   favoritos, edición de perfil y los conmutadores de configuración.
+
+**Lo que nuestro backend tiene y el suyo no**: persistencia real, PostGIS con
+índice espacial, migraciones, moderación con auditoría y todo el entorno en
+Docker.
+
+- **2026-09-29** — [ADR-005] `espotealo/` pasa a ser el frontend del proyecto y
+  se elimina `frontend/` (recuperable con `git checkout 41bd314 -- frontend`).
+  La capa de datos será Firestore, no nuestro PostgreSQL: decisión de Alfredo
+  priorizando tener persistencia hoy sobre las consultas geoespaciales. Queda
+  registrado en el ADR qué se pierde y qué señales deberían reabrirlo.
+- **2026-09-29** — La configuración de Firebase de espotealo deja de estar
+  escrita en el código: sale del entorno y solo cae al JSON de AI Studio si no
+  se define. Añadida una línea de diagnóstico al arrancar que dice proyecto,
+  base y si hay credencial — antes no había forma de saber contra qué corría.
+- **2026-09-29** — El acceso con Google en espotealo fallaba en silencio por la
+  misma causa de siempre (`auth/unauthorized-domain`) y el mismo motivo:
+  `handleGoogleSignIn` se tragaba el error con un `console.error`. Ahora se
+  muestra en pantalla con instrucciones, hay reserva por redirección y se
+  recoge el resultado al volver.
